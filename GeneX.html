@@ -1,0 +1,1335 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>GeneX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: left rail + switching main views (Home, Markets, Trade, Learn, Coach); dense data cards, one accent, semantic green/red for P&L only. */
+:root{
+  --bg:#080D18; --rail:#0B1220; --surface:#101A2C; --surface-2:#16233A; --line:#1F2E47;
+  --fg:#EAF0FB; --muted:#8393AF; --faint:#55657F;
+  --accent:#2F7BFF; --accent-fg:#FFFFFF; --accent-soft:rgba(47,123,255,.15);
+  --up:#22C58B; --up-soft:rgba(34,197,139,.14); --dn:#FF5B6E; --dn-soft:rgba(255,91,110,.14); --warn:#F5B544; --warn-soft:rgba(245,181,68,.14);
+  --grid:rgba(131,147,175,.11); --scrim:rgba(3,7,15,.62);
+  --shadow:0 1px 0 rgba(255,255,255,.03) inset,0 10px 30px rgba(0,0,0,.32);
+  --f-display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --f-body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#F2F5FA; --rail:#FFFFFF; --surface:#FFFFFF; --surface-2:#EDF2FA; --line:#DCE4F0;
+    --fg:#0C1730; --muted:#5A6A86; --faint:#8E9AB2;
+    --accent:#1F66F0; --accent-fg:#FFFFFF; --accent-soft:rgba(31,102,240,.10);
+    --up:#0C9A6B; --up-soft:rgba(12,154,107,.11); --dn:#DC3348; --dn-soft:rgba(220,51,72,.10); --warn:#A8700F; --warn-soft:rgba(168,112,15,.12);
+    --grid:rgba(90,106,134,.14); --scrim:rgba(12,23,48,.40);
+    --shadow:0 1px 2px rgba(15,30,60,.06),0 10px 26px rgba(15,30,60,.06);
+    color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#F2F5FA; --rail:#FFFFFF; --surface:#FFFFFF; --surface-2:#EDF2FA; --line:#DCE4F0;
+  --fg:#0C1730; --muted:#5A6A86; --faint:#8E9AB2;
+  --accent:#1F66F0; --accent-fg:#FFFFFF; --accent-soft:rgba(31,102,240,.10);
+  --up:#0C9A6B; --up-soft:rgba(12,154,107,.11); --dn:#DC3348; --dn-soft:rgba(220,51,72,.10); --warn:#A8700F; --warn-soft:rgba(168,112,15,.12);
+  --grid:rgba(90,106,134,.14); --scrim:rgba(12,23,48,.40);
+  --shadow:0 1px 2px rgba(15,30,60,.06),0 10px 26px rgba(15,30,60,.06);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font:14px/1.5 var(--f-body);-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);margin:0;font-weight:700;letter-spacing:-.015em;text-wrap:balance}
+p{margin:0}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.up{color:var(--up)} .dn{color:var(--dn)} .muted{color:var(--muted)}
+small,.sm{font-size:12px}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
+
+.app{height:100%;display:grid;grid-template-columns:232px minmax(0,1fr)}
+.rail{background:var(--rail);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:4px;padding:18px 14px;min-height:0;overflow:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 8px 18px}
+.word{font-family:var(--f-display);font-weight:700;font-size:22px;letter-spacing:-.03em}
+.word b{color:var(--accent)}
+.nav{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border-radius:10px;border:0;background:transparent;color:var(--muted);font-weight:600;text-align:left}
+.nav svg,.tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav:hover{color:var(--fg);background:var(--surface-2)}
+.nav.on{background:var(--accent-soft);color:var(--fg)}
+.nav.on svg{color:var(--accent)}
+.rail .sp{flex:1}
+.railfoot{display:grid;gap:8px;padding-top:12px;border-top:1px solid var(--line)}
+.fine{font-size:11.5px;color:var(--faint);line-height:1.5}
+
+.col{display:flex;flex-direction:column;min-width:0;min-height:0}
+.top{display:flex;align-items:center;gap:22px;padding:10px clamp(16px,2.4vw,28px);border-bottom:1px solid var(--line);background:var(--rail)}
+.top .logo-m{display:none}
+.stat{display:flex;flex-direction:column;min-width:0}
+.stat small{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.stat b{font-size:16px;font-weight:600}
+.top .sp{flex:1}
+.tools{display:flex;align-items:center;gap:8px}
+.iconbtn{display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--line);background:var(--surface-2);border-radius:9px}
+.iconbtn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.sel{background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:7px 10px;font-weight:600}
+main{flex:1;min-height:0;overflow-y:auto;padding:22px clamp(16px,2.4vw,28px) 48px;display:flex;flex-direction:column;gap:16px}
+main>*{flex:none}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-width:0}
+.pad{padding:18px}
+.cardhead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface-2);border-radius:9px;padding:8px 14px;font-weight:600;transition:border-color .15s,background .15s}
+.btn:hover{border-color:var(--faint)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.primary[disabled]{opacity:.45;cursor:not-allowed;filter:none}
+.btn.sm{padding:4px 10px;font-size:12px;border-radius:8px}
+.btn.dnb{color:var(--dn)}
+.btn.ghost{background:transparent}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;max-width:100%;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:5px 12px;border-radius:7px;font-weight:600;color:var(--muted);font-size:13px}
+.seg button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.22)}
+.badge{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.05em;padding:2px 7px;border-radius:6px;text-transform:uppercase}
+.badge.buy{background:var(--up-soft);color:var(--up)} .badge.sell{background:var(--dn-soft);color:var(--dn)}
+.badge.n{background:var(--surface-2);color:var(--muted)} .badge.w{background:var(--warn-soft);color:var(--warn)}
+.badge.acc{background:var(--accent-soft);color:var(--accent)}
+.empty{padding:30px 18px;text-align:center;color:var(--muted);display:grid;gap:12px;justify-items:center}
+
+/* home */
+.hero{display:grid;grid-template-columns:minmax(0,330px) minmax(0,1fr);gap:26px;align-items:center}
+.bignum{font-size:clamp(30px,5vw,42px);font-weight:600;line-height:1.1;margin:6px 0 6px}
+.delta{display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;font-size:13px}
+#eqChart{width:100%;height:150px;display:block}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile small{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.tile b{font-size:17px;font-weight:600;overflow-wrap:anywhere}
+.tabsrow{display:flex;gap:4px;padding:10px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tabsrow button{border:0;background:transparent;color:var(--muted);font-weight:600;padding:7px 12px;border-radius:8px}
+.tabsrow button.on{background:var(--accent-soft);color:var(--fg)}
+.group{padding:8px 18px 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.prow{display:grid;grid-template-columns:minmax(0,1.5fr) repeat(4,minmax(0,1fr)) auto;gap:12px;align-items:center;padding:12px 18px;border-top:1px solid var(--line)}
+.pcell{display:flex;flex-direction:column;min-width:0}
+.pcell small{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.pcell span,.pcell i{overflow-wrap:anywhere}
+.pcell i{font-style:normal;font-size:11.5px}
+.pname{display:flex;flex-direction:column;gap:2px;min-width:0}
+.symlink{background:none;border:0;padding:0;font-weight:700;font-size:15px;text-align:left;width:fit-content;font-family:var(--f-display)}
+.symlink:hover{color:var(--accent)}
+.pact{display:flex;gap:6px;justify-content:flex-end}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
+.stats div{background:var(--surface);padding:10px 14px;display:flex;flex-direction:column}
+.stats small{color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.welcome{padding:18px;display:grid;gap:12px;border-color:var(--accent);background:linear-gradient(0deg,var(--accent-soft),var(--accent-soft)),var(--surface)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+
+/* markets */
+.mhead{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.search{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px;min-width:0;width:min(260px,100%)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:3px 11px;font-size:12px;color:var(--muted);font-weight:600}
+.chip:hover{color:var(--fg);border-color:var(--faint)}
+.chip.on{background:var(--accent-soft);color:var(--fg);border-color:transparent}
+.mrow{display:grid;grid-template-columns:30px minmax(0,1.7fr) 92px minmax(0,1fr) 84px;gap:12px;align-items:center;padding:11px 18px;border-top:1px solid var(--line);cursor:pointer}
+.mrow:hover{background:var(--surface-2)}
+.star{background:none;border:0;padding:4px;color:var(--faint);font-size:17px;line-height:1}
+.star.on{color:var(--warn)}
+.mname{display:flex;flex-direction:column;min-width:0}
+.mname b{font-family:var(--f-display);font-size:15px}
+.mname small{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.spark{width:92px;height:30px;display:block}
+.mrow .num{text-align:right}
+
+/* trade */
+.tgrid{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:16px;align-items:start}
+.tmain{display:flex;flex-direction:column;gap:16px;min-width:0}
+.thead{display:flex;gap:14px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;padding:14px 18px 6px}
+.tsym{font-family:var(--f-display);font-size:24px;font-weight:700;letter-spacing:-.02em}
+.tpx{font-size:22px;font-weight:600;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.ctrls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chartbox{position:relative;height:clamp(270px,46vh,470px);padding:0 4px 4px}
+.chartbox canvas{width:100%;height:100%;display:block;touch-action:pan-y}
+.ohlc{position:absolute;left:14px;top:2px;font-size:11px;color:var(--muted);pointer-events:none;font-family:var(--f-mono);background:var(--surface);padding:2px 6px;border-radius:6px}
+.ticket{display:flex;flex-direction:column;gap:14px;padding:16px}
+.sides{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.side{border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:10px 12px;text-align:left;display:flex;flex-direction:column;gap:2px}
+.side small{font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:11px}
+.side b{font-size:19px;font-weight:600}
+.side.sell small,.side.sell b{color:var(--dn)} .side.buy small,.side.buy b{color:var(--up)}
+.side.sell.on{background:var(--dn-soft);border-color:var(--dn)} .side.buy.on{background:var(--up-soft);border-color:var(--up)}
+.side.off{opacity:.4}
+.fl{display:flex;flex-direction:column;gap:6px}
+.fl>label,.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+.inp{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-family:var(--f-mono);min-width:0}
+.inp:focus{border-color:var(--accent);outline:none}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stepper{display:grid;grid-template-columns:38px minmax(0,1fr) 38px;gap:6px}
+.stepper .btn{padding:0;font-size:18px;line-height:1}
+.sumtab{display:grid;gap:7px;padding:12px;background:var(--bg);border-radius:10px;border:1px solid var(--line)}
+.sumrow{display:flex;justify-content:space-between;gap:10px;font-size:12.5px}
+.sumrow span:first-child{color:var(--muted)}
+.coach{display:grid;gap:9px}
+.cl{display:flex;gap:9px;font-size:12.5px;line-height:1.45}
+.dot{flex:none;width:8px;height:8px;border-radius:50%;margin-top:6px;background:var(--faint)}
+.dot.ok{background:var(--up)} .dot.warn{background:var(--warn)} .dot.risk{background:var(--dn)} .dot.info{background:var(--accent)}
+.err{font-size:12.5px;color:var(--warn);min-height:18px}
+.coachbox{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:10px;background:var(--surface-2)}
+.coachbox .hd{display:flex;justify-content:space-between;align-items:center;gap:8px}
+
+/* learn */
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.lcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;text-align:left;box-shadow:var(--shadow);min-width:0}
+.lcard:hover{border-color:var(--accent)}
+.lcard h3{font-size:18px}
+.lcard p{color:var(--muted);font-size:13px}
+.lnum{font-family:var(--f-mono);font-size:12px;color:var(--accent);font-weight:600}
+.prog{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.reader{max-width:720px;display:grid;gap:14px}
+.reader p{font-size:15px;line-height:1.65;max-width:65ch}
+.q{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.q label{display:flex;gap:10px;align-items:flex-start;padding:7px 10px;border-radius:8px;cursor:pointer}
+.q label:hover{background:var(--surface-2)}
+.q label.good{background:var(--up-soft)} .q label.bad{background:var(--dn-soft)}
+.q .ex{font-size:12.5px;color:var(--muted)}
+
+/* coach */
+.cgrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+.chatlog{display:flex;flex-direction:column;gap:10px;min-height:260px;max-height:54vh;overflow-y:auto;padding:16px}
+.msg{max-width:90%;padding:10px 13px;border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13.5px;line-height:1.55}
+.msg.u{align-self:flex-end;background:var(--accent);color:var(--accent-fg)}
+.msg.c{align-self:flex-start;background:var(--surface-2)}
+.msg .by{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:3px}
+.chatform{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+.feeditem{padding:12px 16px;border-top:1px solid var(--line)}
+.feeditem:first-child{border-top:0}
+
+/* overlays */
+#toasts{position:fixed;right:16px;bottom:16px;display:grid;gap:8px;z-index:50;width:min(360px,calc(100vw - 32px));pointer-events:none}
+.toast{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:10px 14px;box-shadow:var(--shadow);font-size:13px;pointer-events:auto}
+.toast.ok{border-left-color:var(--up)} .toast.warn{border-left-color:var(--warn)} .toast.risk{border-left-color:var(--dn)}
+.mbg{position:fixed;inset:0;background:var(--scrim);display:grid;place-items:center;padding:16px;z-index:60}
+.modal{width:min(440px,100%);max-height:100%;overflow:auto;padding:20px;display:grid;gap:14px}
+.tabbar{display:none}
+
+@media (max-width:900px){
+  .tgrid,.cgrid{grid-template-columns:minmax(0,1fr)}
+  .hero{grid-template-columns:minmax(0,1fr);gap:14px}
+}
+@media (max-width:860px){
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}
+  .rail{display:none}
+  .top{gap:14px;padding-block:8px}
+  .top .logo-m{display:block;flex:none}
+  .hide-m{display:none!important}
+  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);background:var(--rail);border-top:1px solid var(--line)}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px 7px;border:0;background:transparent;color:var(--muted);font-size:10.5px;font-weight:600}
+  .tab.on{color:var(--accent)}
+  #toasts{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  .prow{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
+  .prow .pname{grid-column:1/-1}
+  .prow .pact{grid-column:1/-1;justify-content:flex-start}
+  .mrow{grid-template-columns:28px minmax(0,1fr) minmax(0,.9fr) 74px}
+  .mrow .spark{display:none}
+  .mrow canvas.sp-c{display:none}
+}
+@media (prefers-reduced-motion:no-preference){
+  .toast{animation:tin .22s ease-out}
+  @keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+}
+</style>
+
+<div class="app">
+  <aside class="rail">
+    <div class="brand" id="brandRail"></div>
+    <div id="navRail"></div>
+    <div class="sp"></div>
+    <div class="railfoot">
+      <div class="btnrow">
+        <button class="btn sm" data-act="theme" aria-label="Switch light or dark theme">Theme</button>
+        <button class="btn sm" data-act="reset">Reset account</button>
+      </div>
+      <p class="fine">GeneX is a paper-trading simulator for learning. Prices are simulated, not live market data, and nothing here is financial advice.</p>
+    </div>
+  </aside>
+  <div class="col">
+    <header class="top">
+      <span class="logo-m" id="logoM"></span>
+      <div class="stat"><small>Equity</small><b class="mono" data-live="a:equity"></b></div>
+      <div class="stat"><small>Total P&amp;L</small><b class="mono" data-live="a:pnl" data-sign></b></div>
+      <div class="stat hide-m"><small>Free funds</small><b class="mono" data-live="a:free"></b></div>
+      <div class="sp"></div>
+      <div class="stat hide-m"><small>Sim clock</small><b class="mono" data-live="clock"></b></div>
+      <div class="tools">
+        <select class="sel" id="speedSel" aria-label="Simulation speed">
+          <option value="1">1×</option><option value="5">5×</option><option value="10">10×</option><option value="30">30×</option>
+        </select>
+        <button class="iconbtn" data-act="pause" id="pauseBtn" aria-label="Pause or resume prices"></button>
+        <button class="iconbtn" data-act="theme" aria-label="Switch light or dark theme" id="themeBtn"></button>
+      </div>
+    </header>
+    <main id="main"></main>
+  </div>
+  <nav class="tabbar" id="tabbar" aria-label="Main"></nav>
+</div>
+<div id="toasts" aria-live="polite"></div>
+<div id="modal"></div>
+
+<script>
+(function(){
+'use strict';
+var BUILT_BY='';/* put your name between the quotes to show a Built by line */
+var DEBUG=/debug/.test(location.hash);
+var TICK_MS=500,HIST=1440,KEY='genex.v1';
+function $(s,r){return (r||document).querySelector(s)}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+function num(v){var n=parseFloat(String(v).replace(/,/g,''));return isFinite(n)?n:NaN}
+function clamp(v,a,b){return Math.min(b,Math.max(a,v))}
+function nf(v,d){return v.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})}
+var CUR={USD:{s:'$',dp:2,sc:1,n:'US dollar'},GBP:{s:'\u00A3',dp:2,sc:1,n:'British pound'},EUR:{s:'\u20AC',dp:2,sc:1,n:'Euro'},AUD:{s:'A$',dp:2,sc:1,n:'Australian dollar'},CAD:{s:'C$',dp:2,sc:1,n:'Canadian dollar'},CHF:{s:'CHF ',dp:2,sc:1,n:'Swiss franc'},JPY:{s:'\u00A5',dp:0,sc:100,n:'Japanese yen'}};
+function cinfo(){return CUR[S.cur]||CUR.USD}
+function usd(v,d){var c=cinfo();d=d==null?c.dp:d;var x=v*(S.fx||1);return (x<0?'\u2212':'')+c.s+nf(Math.abs(x),d)}
+function susd(v,d){var c=cinfo();d=d==null?c.dp:d;var x=v*(S.fx||1);return Math.abs(x)<(c.dp?0.005:0.5)?c.s+nf(0,d):(x>0?'+':'\u2212')+c.s+nf(Math.abs(x),d)}
+function amtChips(){return [100,500,1000,2500].map(function(c){return +(c*(S.fx||1)).toPrecision(2)})}
+function spct(v,d){d=d==null?2:d;return Math.abs(v)<0.005?'0.00%':(v>0?'+':'−')+nf(Math.abs(v),d)+'%'}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function randn(){var u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function trimNum(v,d){return String(+v.toFixed(d))}
+
+/* ============ logo ============ */
+var lid=0;
+function logo(size){
+  var k='lg'+(lid++);
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 48 48" fill="none" aria-hidden="true"><defs>'+
+  '<linearGradient id="'+k+'a" x1="8" y1="6" x2="40" y2="42" gradientUnits="userSpaceOnUse"><stop stop-color="#2F7BFF"/><stop offset="1" stop-color="#2DD4A7"/></linearGradient>'+
+  '<linearGradient id="'+k+'b" x1="40" y1="6" x2="8" y2="42" gradientUnits="userSpaceOnUse"><stop stop-color="#2DD4A7"/><stop offset="1" stop-color="#2F7BFF"/></linearGradient>'+
+  '<mask id="'+k+'m"><rect width="48" height="48" fill="#fff"/><path d="M10 8C10 24 38 24 38 40" stroke="#000" stroke-width="10" stroke-linecap="round"/></mask></defs>'+
+  '<path d="M38 8C38 24 10 24 10 40" stroke="url(#'+k+'b)" stroke-width="5" stroke-linecap="round" mask="url(#'+k+'m)"/>'+
+  '<path d="M10 8C10 24 38 24 38 40" stroke="url(#'+k+'a)" stroke-width="5" stroke-linecap="round"/>'+
+  '<circle cx="10" cy="8" r="2.6" fill="#2F7BFF"/><circle cx="38" cy="40" r="2.6" fill="#2DD4A7"/></svg>';
+}
+
+/* ============ instruments ============ */
+var INST=[],BY={};
+function mk(o){o.base=o.price;INST.push(o);BY[o.sym]=o}
+[['AAPL','Apple',232.5,.0009],['MSFT','Microsoft',428,.0007],['NVDA','NVIDIA',138,.0014],['TSLA','Tesla',248,.0017],
+ ['AMZN','Amazon',186,.0009],['GOOGL','Alphabet',172,.0008],['META','Meta Platforms',575,.0011],['JPM','JPMorgan Chase',215,.0006],['KO','Coca-Cola',68,.0004]
+].forEach(function(r){mk({sym:r[0],name:r[1],price:r[2],sig:r[3],cls:'stock',sub:'Shares',prods:['invest','cfd'],dec:2,spread:Math.max(0.01,+(r[2]*0.0002).toFixed(2)),lev:5,defAmt:500,defUnits:10,minUnit:0.1,chips:[1,5,10,50],unit:'shares'})});
+[['SPY','SPDR S&P 500 ETF',560,.0005],['QQQ','Invesco QQQ Trust',485,.0006],['VT','Vanguard Total World ETF',118,.0004]
+].forEach(function(r){mk({sym:r[0],name:r[1],price:r[2],sig:r[3],cls:'etf',sub:'ETFs',prods:['invest'],dec:2,spread:Math.max(0.01,+(r[2]*0.0001).toFixed(2)),lev:1,defAmt:1000,minUnit:0.0001})});
+[['EURUSD','Euro / US Dollar',1.0850,.00022,5,0.00010],['GBPUSD','Pound / US Dollar',1.2900,.00026,5,0.00012],['USDJPY','US Dollar / Japanese Yen',148.50,.00024,3,0.012],
+ ['AUDUSD','Australian Dollar / US Dollar',0.6700,.00027,5,0.00014],['USDCAD','US Dollar / Canadian Dollar',1.3600,.00020,5,0.00016],['USDCHF','US Dollar / Swiss Franc',0.8800,.00021,5,0.00015]
+].forEach(function(r){mk({sym:r[0],name:r[1],price:r[2],sig:r[3],cls:'forex',sub:'Majors',prods:['forex'],dec:r[4],spread:r[5],pip:r[4]===3?0.01:0.0001,lev:30,minUnit:0.01})});
+[['US500','US 500 Index',5800,.00045,1,0.6,0.5],['UK100','UK 100 Index',8300,.00040,1,1.0,0.5],['GER40','Germany 40 Index',19000,.0005,1,1.2,0.5],['NAS100','US Tech 100 Index',20300,.0006,1,1.8,0.2]
+].forEach(function(r){mk({sym:r[0],name:r[1],price:r[2],sig:r[3],cls:'index',sub:'Indices',prods:['cfd'],dec:r[4],spread:r[5],lev:20,defUnits:r[6],minUnit:0.1,chips:[0.1,0.5,1,2],unit:'units'})});
+mk({sym:'XAUUSD',name:'Gold',price:2700,sig:.0004,cls:'commodity',sub:'Commodities',prods:['cfd'],dec:2,spread:0.35,lev:20,defUnits:0.5,minUnit:0.1,chips:[0.1,0.5,1,2],unit:'oz'});
+mk({sym:'XTIUSD',name:'Crude Oil (WTI)',price:70.5,sig:.0008,cls:'commodity',sub:'Commodities',prods:['cfd'],dec:2,spread:0.04,lev:10,defUnits:10,minUnit:1,chips:[1,10,50,100],unit:'barrels'});
+var GROUPS=[['Shares','stock'],['ETFs','etf'],['Forex','forex'],['Indices','index'],['Commodities','commodity']];
+function fp(i,v){return v.toFixed(i.dec)}
+function maxLev(i,prod){return prod==='invest'?1:i.lev}
+function prodName(p){return p==='invest'?'Invest':p==='forex'?'Forex':'CFD'}
+
+/* ============ state ============ */
+function freshState(start){return {v:1,start:start,balance:start,positions:[],orders:[],history:[],equity:[],watch:['AAPL','EURUSD','US500','XAUUSD'],nid:1,mids:{},lessons:{},feed:[],speed:10,theme:null,welcomed:false,cur:'USD',fx:1}}
+function loadState(){try{var r=localStorage.getItem(KEY);if(!r)return null;var s=JSON.parse(r);if(!s||s.v!==1||!Array.isArray(s.positions)||!Array.isArray(s.history))return null;var f=freshState(10000);for(var k in s)f[k]=s[k];return f}catch(e){return null}}
+var S=loadState()||freshState(10000);
+S.positions=S.positions.filter(function(p){return BY[p.sym]});
+S.orders=(S.orders||[]).filter(function(o){return BY[o.sym]});
+if(!CUR[S.cur])S.cur='USD';if(!(S.fx>0))S.fx=1;
+function fxRate(c){switch(c){case 'GBP':return 1/BY.GBPUSD.mid;case 'EUR':return 1/BY.EURUSD.mid;case 'AUD':return 1/BY.AUDUSD.mid;case 'CAD':return BY.USDCAD.mid;case 'CHF':return BY.USDCHF.mid;case 'JPY':return BY.USDJPY.mid;default:return 1}}
+function save(){try{INST.forEach(function(i){S.mids[i.sym]=i.mid});localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+/* ============ market simulator ============ */
+var simMs=Date.now(),paused=false,ticks=0;
+function minOf(ms){return Math.floor(ms/60000)}
+function updQuote(i){i.bid=i.mid-i.spread/2;i.ask=i.mid+i.spread/2}
+function genHistory(i,target){
+  var p=1,mu=0,arr=[],nowMin=minOf(simMs),k,j,c;
+  for(k=0;k<HIST;k++){
+    var o=p,h=p,l=p;
+    for(j=0;j<6;j++){var dt=1/6;mu=mu*0.99+0.012*i.sig*randn();p*=Math.exp(mu*dt+i.sig*Math.sqrt(dt)*randn());if(p>h)h=p;if(p<l)l=p}
+    arr.push({t:nowMin-(HIST-1-k),o:o,h:h,l:l,c:p});
+  }
+  var f=target/p;
+  for(k=0;k<arr.length;k++){c=arr[k];c.o*=f;c.h*=f;c.l*=f;c.c*=f}
+  i.c1=arr;i.mid=target;i.ref=arr[0].o;i.mu=0;
+}
+function stepInst(i,dt){
+  i.mu=i.mu*0.99+0.012*i.sig*randn();
+  var r=i.mu*dt+i.sig*Math.sqrt(dt)*randn()-0.002*Math.log(i.mid/i.base)*dt;
+  i.mid*=Math.exp(r);
+  var mn=minOf(simMs),c=i.c1[i.c1.length-1];
+  if(c.t!==mn){
+    i.c1.push({t:mn,o:c.c,h:Math.max(c.c,i.mid),l:Math.min(c.c,i.mid),c:i.mid});
+    if(i.c1.length>HIST+360)i.c1.shift();
+  }else{c.c=i.mid;if(i.mid>c.h)c.h=i.mid;if(i.mid<c.l)c.l=i.mid}
+  updQuote(i);
+}
+INST.forEach(function(i){genHistory(i,S.mids[i.sym]||i.price);updQuote(i)});
+function agg(c1,k){
+  if(k===1)return c1;
+  var out=[],cur=null,n,c,g;
+  for(n=0;n<c1.length;n++){c=c1[n];g=Math.floor(c.t/k)*k;
+    if(!cur||cur.t!==g){cur={t:g,o:c.o,h:c.h,l:c.l,c:c.c};out.push(cur)}
+    else{if(c.h>cur.h)cur.h=c.h;if(c.l<cur.l)cur.l=c.l;cur.c=c.c}}
+  return out;
+}
+function hourRange(i){return i.mid*i.sig*Math.sqrt(60)}
+function sessChg(i){return (i.mid/i.ref-1)*100}
+
+/* ============ trading engine ============ */
+function convUSD(i,px){return (i.cls==='forex'&&i.sym.indexOf('USD')===0)?1/px:1}
+function notionalUSD(i,units,px){if(i.cls==='forex')return i.sym.indexOf('USD')===0?units:units*px;return units*px}
+function closePx(p){var i=BY[p.sym];return p.side==='buy'?i.bid:i.ask}
+function pnlFor(p,px,units){var i=BY[p.sym];return (px-p.entry)*(p.side==='buy'?1:-1)*units*convUSD(i,px)}
+function posCost(p){return p.prod==='invest'?p.units*p.entry:p.margin}
+function acct(){
+  var inv=0,invCost=0,lp=0,mg=0,n,p,i;
+  for(n=0;n<S.positions.length;n++){p=S.positions[n];i=BY[p.sym];
+    if(p.prod==='invest'){inv+=p.units*i.bid;invCost+=p.units*p.entry}
+    else{lp+=pnlFor(p,closePx(p),p.units);mg+=p.margin}}
+  return {equity:S.balance+inv+lp,invest:inv,levPnL:lp,margin:mg,free:S.balance+lp-mg,mlevel:mg>0?(S.balance+lp)/mg*100:null,upnl:(inv-invCost)+lp};
+}
+function exposure(){var t=0;S.positions.forEach(function(p){var i=BY[p.sym];t+=notionalUSD(i,p.units,i.mid)});return t}
+
+function checkOrder(o){
+  var i=BY[o.sym];
+  if(!(o.units>0))return 'Enter a size';
+  if(o.prod==='invest'&&o.side!=='buy')return 'Invest is long-only. To sell, close the holding from Home.';
+  var ref=o.type==='limit'?o.limit:(o.side==='buy'?i.ask:i.bid);
+  if(o.prod==='invest'&&o.units*ref<1)return 'Minimum order is '+usd(1);
+  if(o.prod==='forex'&&o.size<0.01)return 'Minimum is 0.01 lots';
+  if(o.prod==='cfd'&&o.size<i.minUnit)return 'Minimum is '+i.minUnit+' '+i.unit;
+  if(o.type==='limit'){
+    if(!(o.limit>0))return 'Enter a limit price';
+    if(o.side==='buy'&&o.limit>=i.ask)return 'A buy limit must be below the current ask ('+fp(i,i.ask)+')';
+    if(o.side==='sell'&&o.limit<=i.bid)return 'A sell limit must be above the current bid ('+fp(i,i.bid)+')';
+  }
+  var base=o.type==='limit'?o.limit:(o.side==='buy'?i.bid:i.ask);
+  if(o.sl!=null&&(o.side==='buy'?o.sl>=base:o.sl<=base))return 'Stop loss must be '+(o.side==='buy'?'below ':'above ')+fp(i,base);
+  if(o.tp!=null&&(o.side==='buy'?o.tp<=base:o.tp>=base))return 'Take profit must be '+(o.side==='buy'?'above ':'below ')+fp(i,base);
+  var A=acct(),need=o.prod==='invest'?o.units*ref:notionalUSD(i,o.units,ref)/o.lev;
+  if(need>A.free+1e-9)return 'Not enough free funds. Needs '+usd(need)+', you have '+usd(Math.max(0,A.free));
+  return null;
+}
+function openPosition(o){
+  var chk=checkOrder({sym:o.sym,prod:o.prod,side:o.side,units:o.units,size:o.size,lev:o.lev,sl:o.sl,tp:o.tp,type:'market'});
+  if(chk)return {error:chk};
+  var i=BY[o.sym],entry=o.side==='buy'?i.ask:i.bid,lev=o.prod==='invest'?1:o.lev;
+  var notional=notionalUSD(i,o.units,entry);
+  var p={id:S.nid++,sym:o.sym,prod:o.prod,side:o.side,size:o.size,units:o.units,entry:entry,lev:lev,margin:o.prod==='invest'?0:notional/lev,sl:o.sl,tp:o.tp,t:Date.now(),
+    riskUSD:o.sl!=null?Math.abs(entry-o.sl)*o.units*convUSD(i,entry):null,eq0:acct().equity};
+  if(o.prod==='invest')S.balance-=o.units*entry;
+  S.positions.push(p);
+  openNote(p);afterChange();
+  return {ok:true,p:p};
+}
+function closePosition(id,frac,reason){
+  var p=S.positions.find(function(x){return x.id===id});if(!p)return;
+  var px=closePx(p),f=frac>=0.999?1:clamp(frac,0.01,1),units=p.units*f,pnl=pnlFor(p,px,units);
+  if(p.prod==='invest')S.balance+=units*px;else S.balance+=pnl;
+  if(S.balance<0)S.balance=0;
+  var rec={id:p.id,sym:p.sym,prod:p.prod,side:p.side,size:p.size*f,entry:p.entry,exit:px,pnl:pnl,reason:reason||'manual',openedAt:p.t,closedAt:Date.now(),sl:p.sl,tp:p.tp,risk:p.riskUSD!=null?p.riskUSD*f:null,lev:p.lev};
+  S.history.unshift(rec);if(S.history.length>300)S.history.pop();
+  if(f>=1)S.positions=S.positions.filter(function(x){return x.id!==id});
+  else{p.units-=units;p.size-=p.size*f;p.margin*=(1-f);if(p.riskUSD!=null)p.riskUSD*=(1-f)}
+  closeNote(rec);afterChange();
+}
+function checkOrders(){
+  S.orders.slice().forEach(function(o){
+    var i=BY[o.sym],hit=o.side==='buy'?i.ask<=o.limit:i.bid>=o.limit;
+    if(!hit)return;
+    S.orders=S.orders.filter(function(x){return x.id!==o.id});
+    var r=openPosition(o);
+    if(r.error){addFeed('Your '+o.side+' limit on '+o.sym+' was cancelled when it triggered. '+r.error+'.','warn');toast('Limit order cancelled: '+r.error,'warn');afterChange()}
+    else toast('Limit order filled: '+o.side+' '+o.sym,'ok');
+  });
+}
+function checkTriggers(){
+  S.positions.slice().forEach(function(p){
+    var px=closePx(p);
+    if(p.sl!=null&&(p.side==='buy'?px<=p.sl:px>=p.sl)){closePosition(p.id,1,'stop-loss');return}
+    if(p.tp!=null&&(p.side==='buy'?px>=p.tp:px<=p.tp)){closePosition(p.id,1,'take-profit')}
+  });
+}
+function checkStopOut(){
+  var g=0;
+  while(g++<20){
+    var A=acct();if(A.margin<=0||A.mlevel>=50)break;
+    var lv=S.positions.filter(function(p){return p.prod!=='invest'});if(!lv.length)break;
+    lv.sort(function(a,b){return pnlFor(a,closePx(a),a.units)-pnlFor(b,closePx(b),b.units)});
+    closePosition(lv[0].id,1,'stop-out');
+  }
+}
+function sampleEquity(){
+  var mn=minOf(simMs),last=S.equity[S.equity.length-1];
+  if(!last||last.t!==mn){S.equity.push({t:mn,v:acct().equity});if(S.equity.length>600)S.equity.shift()}
+  else last.v=acct().equity;
+}
+
+/* ============ coach (built-in rules) ============ */
+function addFeed(text,kind){S.feed.unshift({t:Date.now(),text:text,kind:kind||'info'});if(S.feed.length>40)S.feed.pop();if(view.name==='coach')renderFeed()}
+function openNote(p){
+  var i=BY[p.sym],parts=[],kind='info',A=acct();
+  var head=(p.side==='buy'?'Bought ':'Sold ')+p.sym+' at '+fp(i,p.entry)+'.';
+  if(p.prod!=='invest'&&p.sl==null){kind='warn';parts.push('No stop loss is set, so there is no plan for being wrong. Add one from the position row.')}
+  if(p.riskUSD!=null){var rp=p.riskUSD/A.equity*100;parts.push('If your stop is hit you lose about '+usd(p.riskUSD)+' ('+nf(rp,1)+'% of equity).');if(rp>5)kind='risk';else if(rp>2&&kind==='info')kind='warn';else if(kind==='info')kind='ok'}
+  addFeed(head+' '+parts.join(' '),kind);
+  toast(head,kind==='info'?'ok':kind);
+}
+function closeNote(r){
+  var win=r.pnl>=0,kind=win?'ok':'warn',text;
+  var head=(r.side==='buy'?'Long ':'Short ')+r.sym+' closed '+susd(r.pnl);
+  if(r.reason==='stop-out'){kind='risk';text=head+'. The platform closed it because your margin level fell below 50%. A smaller size or lower leverage keeps normal price swings from doing this.'}
+  else if(r.reason==='stop-loss'){kind='warn';text=head+'. Your stop loss worked as designed and capped the loss. Ask whether the entry was poor or the stop sat inside normal price noise.'}
+  else if(r.reason==='take-profit'){kind='ok';text=head+'. Your target was hit. Planned exits take emotion out of the decision.'}
+  else if(r.prod!=='invest'&&r.sl==null&&!win){text=head+'. There was no stop loss, so this exit was a judgement call made under pressure. Set one before entering next time.'}
+  else if(win){text=head+'. Check whether you followed your plan, not only whether you made money.'}
+  else{text=head+'. Small losses are normal. Check that the loss stayed within what you planned to risk.'}
+  if(r.risk>0)text+=' That result is '+(r.pnl/r.risk).toFixed(1)+'R (R is the amount you planned to risk).';
+  addFeed(text,kind);
+  toast(head+(r.reason==='manual'?'':' ('+r.reason.replace('-',' ')+')'),win?'ok':(kind==='risk'?'risk':'warn'));
+}
+function coachPortfolio(){
+  var out=[],A=acct(),P=S.positions,H=S.history;
+  if(!P.length&&!H.length)return [{lvl:'info',text:'No trades yet. Start small, set a stop loss before you click, and watch how the coach reads your risk.'}];
+  if(A.mlevel!=null){
+    if(A.mlevel<100)out.push({lvl:'risk',text:'Margin level is '+A.mlevel.toFixed(0)+'%. Under 100% you are in margin call territory, and the platform closes trades at 50%. Cut size or close a position.'});
+    else if(A.mlevel<300)out.push({lvl:'warn',text:'Margin level is '+A.mlevel.toFixed(0)+'%. That leaves limited room for a move against you.'});
+    else out.push({lvl:'ok',text:'Margin level is healthy at '+A.mlevel.toFixed(0)+'%.'});
+  }
+  var ns=P.filter(function(p){return p.prod!=='invest'&&p.sl==null}).length;
+  if(ns)out.push({lvl:'warn',text:ns+' leveraged position'+(ns>1?'s have':' has')+' no stop loss. Losses on these are limited only by your margin.'});
+  if(P.length){
+    var tot=exposure(),lev=tot/Math.max(A.equity,1);
+    if(lev>5)out.push({lvl:'warn',text:'Your total market exposure is '+lev.toFixed(1)+'× your account. Professionals rarely run that high while learning.'});
+    if(P.length>1){var big=0,bs='';P.forEach(function(p){var i=BY[p.sym],v=notionalUSD(i,p.units,i.mid);if(v>big){big=v;bs=p.sym}});
+      if(big/tot>0.6)out.push({lvl:'warn',text:bs+' is '+Math.round(big/tot*100)+'% of your exposure. One market moving against you would dominate your results.'})}
+  }
+  if(H.length>=5){
+    var w=H.filter(function(h){return h.pnl>0}),l=H.filter(function(h){return h.pnl<0});
+    var wr=w.length/H.length*100,aw=w.length?w.reduce(function(a,h){return a+h.pnl},0)/w.length:0,al=l.length?Math.abs(l.reduce(function(a,h){return a+h.pnl},0)/l.length):0;
+    var txt='Win rate '+wr.toFixed(0)+'%, average win '+usd(aw)+', average loss '+usd(al)+'. ';
+    if(al>0&&aw/al<1&&wr<60)txt+='Your losses are bigger than your wins. Tighten stops or let winners run.';
+    else if(al>0&&aw/al>=1.5)txt+='Winners are larger than losers, which is what makes a strategy survive.';
+    else txt+='Keep logging why you enter each trade so you can see what works.';
+    out.push({lvl:wr>=50&&aw>=al?'ok':'info',text:txt});
+  }
+  var worst=H.reduce(function(m,h){return Math.min(m,h.pnl)},0);
+  if(-worst>S.start*0.05)out.push({lvl:'warn',text:'Your worst trade lost '+usd(-worst)+', more than 5% of your starting balance. Cap single-trade risk near 1–2%.'});
+  if(!out.length)out.push({lvl:'ok',text:'Nothing alarming in your account right now. Keep position sizes small and stops in place.'});
+  return out.slice(0,6);
+}
+var fbN=0;
+function localAnswer(q){
+  var s=q.toLowerCase(),P=S.positions;
+  if(/^(hi|hello|hey)\b/.test(s))return 'Hello. Ask me to review your account, explain a concept like margin or stop losses, or talk through a trade you are planning.';
+  if(/review|portfolio|account|how am i|doing|my trades|last trade|lose|lost|why did/.test(s))return coachPortfolio().map(function(x){return x.text}).join(' ');
+  if(/margin|stop.?out|call/.test(s))return 'Margin is the deposit held while a leveraged trade is open: position value divided by leverage. Margin level is equity divided by margin used. Below 100% you are in margin call territory, and GeneX closes your worst trade when it falls under 50%. Smaller size and lower leverage are the fix.';
+  if(/leverage/.test(s))return 'Leverage lets you control a larger position than your cash. At 1:10 a $5,000 position needs $500 of margin. It magnifies gains and losses equally, so a 2% move against you costs 20% of the margin. Beginners do well at 1:5 or lower.';
+  if(/stop|sl\b/.test(s))return 'A stop loss closes your trade at a price you choose in advance. Place it where your idea is proven wrong, beyond normal price noise, then size the trade so hitting it costs 1 to 2% of equity. The Size for 1% risk button in the ticket does that sum for you.';
+  if(/spread|bid|ask/.test(s))return 'You buy at the ask and sell at the bid. The gap is the spread, and it is the main cost of a commission-free trade. Every position starts slightly negative by that amount.';
+  if(/pip|lot/.test(s))return 'A pip is 0.0001 on most pairs and 0.01 on yen pairs. One standard lot is 100,000 units, so a pip on 1 lot of EURUSD is about $10, and 0.10 lot is about $1 per pip.';
+  if(/short|sell first/.test(s))return 'Going short means selling first and buying back later, so you profit if the price falls. A rising price has no ceiling, so losses can grow quickly. Always set a stop loss on a short.';
+  if(/etf|diversif/.test(s))return 'Diversification spreads your money so one holding going wrong hurts less. An ETF holds many assets in one purchase, which lowers single-company risk. It does not remove market risk, because whole markets can fall together.';
+  if(/limit|market order|order type/.test(s))return 'A market order fills now at the current bid or ask. A limit order waits for a price you choose, so you may get a better price but it might never fill. A stop loss and a take profit close the trade for you at levels you set.';
+  if(/currenc|pound|euro|yen/.test(s))return 'Your account currency only changes how money is shown. Your starting balance is converted once, then profit, loss and margin are tracked in that currency. Market prices still quote in their own currency, for example Apple in dollars.';
+  if(/candle|chart|trend|support|resist/.test(s))return 'Each candle shows the open, high, low and close for one period. Trends are higher highs and higher lows, or the reverse. Support and resistance are zones where price has often stopped or turned. Try the SMA 20 button on the chart.';
+  if(/cfd/.test(s))return 'A CFD is a contract on the price change, not ownership. You can go long or short and use leverage, so gains and losses are bigger and faster than buying shares. Share CFDs here max out at 1:5, indices and gold at 1:20.';
+  if(/risk|size|how much/.test(s))return 'Decide what you are willing to lose first, commonly 1 to 2% of equity. Position size equals that money divided by the distance to your stop. With 10,000 and 1% risk, you accept 100, and a stop that is 4 away per unit means 25 units.';
+  if(/lesson|learn|start|beginner/.test(s))return 'Start with the Foundations track in Learn: how paper trading works, bid and ask, order types, candlesticks and trends. Then do Risk and mindset before you use leverage.';
+  var opts=[P.length?'You have '+P.length+' open position'+(P.length>1?'s':'')+'. Ask me to review your account for a risk check, or ask about stop losses, margin or leverage.':'You have no open positions yet. Try asking how big your first position should be, or what a stop loss does.',
+    'Try a specific question such as what margin is, how stop losses work, what the spread costs you, or review my account.',
+    'The built-in coach covers risk, leverage, orders and your positions. For open-ended answers you need the AI coach.'];
+  return opts[fbN++%3];
+}
+function coachTicket(m){
+  var out=[];
+  if(m.prod!=='invest'&&m.sl==null)out.push({lvl:'warn',text:'No stop loss. A leveraged trade without one can lose more than you planned.'});
+  if(m.riskUSD!=null){
+    var rp=m.riskPct;
+    if(rp>5)out.push({lvl:'risk',text:'If the stop is hit you lose '+usd(m.riskUSD)+' ('+nf(rp,1)+'% of equity). Most traders cap this at 1–2%.'});
+    else if(rp>2)out.push({lvl:'warn',text:'Risk at the stop is '+usd(m.riskUSD)+' ('+nf(rp,1)+'% of equity). That is above the usual 1–2%.'});
+    else out.push({lvl:'ok',text:'Risk at the stop is '+usd(m.riskUSD)+' ('+nf(rp,1)+'% of equity). That is a sensible size.'});
+  }
+  if(m.rr!=null){
+    var be=100/(1+m.rr);
+    if(m.rr<1)out.push({lvl:'warn',text:'Reward is smaller than risk (1:'+m.rr.toFixed(1)+'). You would need to win over '+be.toFixed(0)+'% of trades to break even.'});
+    else if(m.rr>=2)out.push({lvl:'ok',text:'Reward-to-risk is 1:'+m.rr.toFixed(1)+'. You can win only '+be.toFixed(0)+'% of trades and still break even.'});
+    else out.push({lvl:'info',text:'Reward-to-risk is 1:'+m.rr.toFixed(1)+'. Aim for 1:2 or better if the setup allows.'});
+  }
+  if(m.prod!=='invest'&&m.margin>0&&m.A.free>0&&m.margin/m.A.free>0.5)out.push({lvl:'warn',text:'This uses '+Math.round(m.margin/m.A.free*100)+'% of your free funds as margin, leaving little buffer before a margin call.'});
+  if(m.prod==='invest'&&m.cost/Math.max(m.A.equity,1)>0.25){
+    out.push({lvl:'warn',text:'This puts '+Math.round(m.cost/m.A.equity*100)+'% of your account into one holding. Spreading across several reduces single-company risk.'});
+  }else if(m.prod==='invest'&&m.inst.cls==='etf')out.push({lvl:'ok',text:'An index ETF spreads your money across many companies, which lowers single-stock risk.'});
+  var held=S.positions.filter(function(p){return p.sym===m.inst.sym&&p.side===m.side}).length;
+  if(held)out.push({lvl:'info',text:'You already hold this market in the same direction. Adding increases your exposure to one idea.'});
+  if(m.spreadCost>0)out.push({lvl:'info',text:'The spread costs about '+usd(m.spreadCost)+' to enter. Price must move that far in your favour just to break even.'});
+  return out.slice(0,5);
+}
+
+/* ============ ticket state ============ */
+var view={name:'home',sym:'EURUSD',prod:'forex',tf:1,type:'candle',mTab:'invest',mSub:'All',mQ:'',hl:'pos',lesson:null,hover:null,sma:false};
+var T=null;
+function initTicket(){
+  var i=BY[view.sym];
+  T={side:'buy',type:'market',mode:'amt',size:'',limit:'',sl:'',tp:'',lev:0};
+  if(view.prod==='invest')T.size=String(Math.round((i.defAmt||500)*(S.fx||1)/10)*10);
+  else if(view.prod==='forex'){T.size='0.10';T.lev=Math.min(10,i.lev)}
+  else{T.size=String(i.defUnits||1);T.lev=Math.min(5,i.lev)}
+}
+initTicket();
+function levOptions(mx){var a=[2,5,10,20,30].filter(function(n){return n<=mx});if(a.indexOf(mx)<0)a.push(mx);return a}
+function buildOrder(){
+  var i=BY[view.sym],prod=view.prod,side=T.side,v=num(T.size),limit=T.type==='limit'?num(T.limit):NaN;
+  var ref=T.type==='limit'&&limit>0?limit:(side==='buy'?i.ask:i.bid),units=0,size=0;
+  if(v>0){
+    if(prod==='invest'){units=Math.floor((T.mode==='amt'?(v/(S.fx||1))/ref:v)*1e4)/1e4;size=units}
+    else if(prod==='forex'){size=Math.round(v*100)/100;units=size*100000}
+    else{size=Math.round(v*100)/100;units=size}
+  }
+  var sl=num(T.sl),tp=num(T.tp);
+  return {sym:i.sym,prod:prod,side:side,type:T.type,units:units,size:size,lev:prod==='invest'?1:T.lev,limit:limit>0?limit:null,sl:sl>0?sl:null,tp:tp>0?tp:null,ref:ref};
+}
+function metrics(){
+  var o=buildOrder(),i=BY[o.sym],A=acct(),entry=o.ref,cv=convUSD(i,entry);
+  var notional=notionalUSD(i,o.units,entry),m={o:o,inst:i,prod:o.prod,side:o.side,entry:entry,notional:notional,A:A};
+  m.margin=o.prod==='invest'?0:notional/o.lev;m.cost=o.prod==='invest'?o.units*entry:0;
+  m.spreadCost=i.spread*o.units*cv;
+  m.riskUSD=o.sl!=null?Math.abs(entry-o.sl)*o.units*cv:null;
+  m.rewardUSD=o.tp!=null?Math.abs(o.tp-entry)*o.units*cv:null;
+  m.riskPct=m.riskUSD!=null?m.riskUSD/Math.max(A.equity,1)*100:null;
+  m.rr=(m.riskUSD>0&&m.rewardUSD!=null)?m.rewardUSD/m.riskUSD:null;
+  m.freeAfter=A.free-(o.prod==='invest'?m.cost:m.margin);
+  m.sl=o.sl;m.tp=o.tp;
+  m.err=checkOrder(o);
+  return m;
+}
+
+/* ============ charts ============ */
+function fitCanvas(cv){
+  var dpr=window.devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;
+  if(!w||!h)return null;
+  var pw=Math.round(w*dpr),ph=Math.round(h*dpr);
+  if(cv.width!==pw||cv.height!==ph){cv.width=pw;cv.height=ph}
+  var ctx=cv.getContext('2d');if(!ctx)return null;
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+  return {ctx:ctx,w:w,h:h};
+}
+function pal(){var cs=getComputedStyle(document.documentElement);var g=function(n){return cs.getPropertyValue(n).trim()};
+  return {up:g('--up'),dn:g('--dn'),acc:g('--accent'),grid:g('--grid'),muted:g('--muted'),fg:g('--fg'),surface:g('--surface'),warn:g('--warn')}}
+function tfmt(min){return new Date(min*60000).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
+function drawMain(){
+  var cv=$('#mainChart');if(!cv)return;
+  var f=fitCanvas(cv);if(!f)return;
+  var ctx=f.ctx,w=f.w,h=f.h,i=BY[view.sym],C=pal();
+  var all=agg(i.c1,view.tf),padR=70,padB=24,padT=12,padL=6,pw=w-padR-padL;
+  var maxBars=Math.max(30,Math.floor(pw/(view.type==='candle'?9:5)));
+  var smv=null;
+  if(view.sma){var sm=[],sum=0,q;for(q=0;q<all.length;q++){sum+=all[q].c;if(q>=20)sum-=all[q-20].c;sm.push(q>=19?sum/20:null)}smv=sm.slice(-maxBars)}
+  var bars=all.slice(-maxBars);var n=bars.length,step=pw/n;
+  var hi=-Infinity,lo=Infinity,k;
+  for(k=0;k<n;k++){if(bars[k].h>hi)hi=bars[k].h;if(bars[k].l<lo)lo=bars[k].l}
+  if(smv)smv.forEach(function(v){if(v!=null){if(v>hi)hi=v;if(v<lo)lo=v}});
+  var lines=[],rng=hi-lo||i.mid*0.001;
+  S.positions.filter(function(p){return p.sym===i.sym}).forEach(function(p){
+    lines.push({y:p.entry,t:(p.side==='buy'?'BUY ':'SELL ')+fp(i,p.entry),c:C.acc,d:[]});
+    if(p.sl!=null)lines.push({y:p.sl,t:'SL '+fp(i,p.sl),c:C.dn,d:[5,4]});
+    if(p.tp!=null)lines.push({y:p.tp,t:'TP '+fp(i,p.tp),c:C.up,d:[5,4]});
+  });
+  S.orders.filter(function(o){return o.sym===i.sym}).forEach(function(o){lines.push({y:o.limit,t:'LIMIT '+fp(i,o.limit),c:C.warn,d:[2,3]})});
+  lines=lines.filter(function(l){return l.y>lo-rng*1.2&&l.y<hi+rng*1.2});
+  lines.forEach(function(l){if(l.y>hi)hi=l.y;if(l.y<lo)lo=l.y});
+  var span=(hi-lo)||i.mid*0.001;hi+=span*0.08;lo-=span*0.08;
+  var Y=function(v){return padT+(1-(v-lo)/(hi-lo))*(h-padT-padB)};
+  var X=function(idx){return padL+(idx+0.5)*step};
+  ctx.font='11px '+getComputedStyle(document.body).getPropertyValue('--f-mono');
+  ctx.font='11px "JetBrains Mono", ui-monospace, monospace';
+  ctx.lineWidth=1;
+  for(k=0;k<=5;k++){var v=lo+(hi-lo)*k/5,y=Math.round(Y(v))+0.5;
+    ctx.strokeStyle=C.grid;ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(w-padR,y);ctx.stroke();
+    ctx.fillStyle=C.muted;ctx.textAlign='left';ctx.fillText(fp(i,v),w-padR+8,y+4)}
+  var nt=Math.max(2,Math.floor(pw/110));
+  for(k=0;k<nt;k++){var idx=Math.floor((n-1)*k/(nt-1||1)),x=X(idx);
+    ctx.strokeStyle=C.grid;ctx.beginPath();ctx.moveTo(Math.round(x)+0.5,padT);ctx.lineTo(Math.round(x)+0.5,h-padB);ctx.stroke();
+    ctx.fillStyle=C.muted;ctx.textAlign=k===0?'left':(k===nt-1?'right':'center');ctx.fillText(tfmt(bars[idx].t),k===0?Math.max(x-4,padL):x,h-7)}
+  if(view.type==='candle'){
+    var bw=clamp(step*0.68,2,15);
+    for(k=0;k<n;k++){var b=bars[k],x2=X(k),up=b.c>=b.o,col=up?C.up:C.dn;
+      ctx.strokeStyle=col;ctx.fillStyle=col;
+      ctx.beginPath();ctx.moveTo(Math.round(x2)+0.5,Y(b.h));ctx.lineTo(Math.round(x2)+0.5,Y(b.l));ctx.stroke();
+      var yo=Y(b.o),yc=Y(b.c);ctx.fillRect(x2-bw/2,Math.min(yo,yc),bw,Math.max(1,Math.abs(yo-yc)))}
+  }else{
+    var up2=bars[n-1].c>=bars[0].o,col2=up2?C.up:C.dn;
+    ctx.beginPath();for(k=0;k<n;k++){var px=X(k),py=Y(bars[k].c);if(k===0)ctx.moveTo(px,py);else ctx.lineTo(px,py)}
+    ctx.strokeStyle=col2;ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();ctx.lineWidth=1;
+    ctx.lineTo(X(n-1),h-padB);ctx.lineTo(X(0),h-padB);ctx.closePath();
+    var gr=ctx.createLinearGradient(0,padT,0,h-padB);gr.addColorStop(0,col2+'44');gr.addColorStop(1,col2+'00');
+    try{ctx.fillStyle=gr;ctx.fill()}catch(e){}
+  }
+  if(smv){ctx.beginPath();var st=false;for(k=0;k<n;k++){if(smv[k]==null)continue;var sx=X(k),sy=Y(smv[k]);if(!st){ctx.moveTo(sx,sy);st=true}else ctx.lineTo(sx,sy)}ctx.strokeStyle=C.warn;ctx.lineWidth=1.6;ctx.stroke();ctx.lineWidth=1}
+  [{v:i.bid,d:[3,4]},{v:i.ask,d:[3,4]}].forEach(function(l){ctx.strokeStyle=C.muted;ctx.globalAlpha=.5;ctx.setLineDash(l.d);ctx.beginPath();ctx.moveTo(padL,Math.round(Y(l.v))+0.5);ctx.lineTo(w-padR,Math.round(Y(l.v))+0.5);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1});
+  lines.forEach(function(l){var y=Math.round(Y(l.y))+0.5;ctx.strokeStyle=l.c;ctx.setLineDash(l.d);ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(w-padR,y);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=l.c;ctx.fillRect(w-padR+1,y-8,padR-2,16);ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font='10px "JetBrains Mono", ui-monospace, monospace';ctx.fillText(l.t.length>10?l.t.slice(0,10):l.t,w-padR+4,y+3.5);ctx.font='11px "JetBrains Mono", ui-monospace, monospace'});
+  var ym=Math.round(Y(i.mid))+0.5,chg=sessChg(i);
+  ctx.fillStyle=chg>=0?C.up:C.dn;ctx.fillRect(w-padR+1,ym-9,padR-2,18);ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(fp(i,i.mid),w-padR+5,ym+4);
+  var hb=bars[n-1];
+  if(view.hover){
+    var hx=view.hover.x,hy=view.hover.y,hidx=clamp(Math.floor((hx-padL)/step),0,n-1);
+    ctx.strokeStyle=C.muted;ctx.globalAlpha=.6;ctx.setLineDash([2,3]);
+    ctx.beginPath();ctx.moveTo(Math.round(X(hidx))+0.5,padT);ctx.lineTo(Math.round(X(hidx))+0.5,h-padB);ctx.moveTo(padL,Math.round(hy)+0.5);ctx.lineTo(w-padR,Math.round(hy)+0.5);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
+    hb=bars[hidx];
+  }
+  var oh=$('#ohlc');if(oh)oh.textContent=tfmt(hb.t)+'  O '+fp(i,hb.o)+'  H '+fp(i,hb.h)+'  L '+fp(i,hb.l)+'  C '+fp(i,hb.c);
+}
+function drawEquity(){
+  var cv=$('#eqChart');if(!cv)return;
+  var f=fitCanvas(cv);if(!f)return;
+  var ctx=f.ctx,w=f.w,h=f.h,C=pal(),pts=S.equity.slice(-240);
+  if(pts.length<2){ctx.fillStyle=C.muted;ctx.font='12px "Figtree", system-ui, sans-serif';ctx.fillText('Your equity curve builds as the simulation runs.',0,h/2);return}
+  var lo=S.start,hi=S.start,k;
+  pts.forEach(function(p){if(p.v<lo)lo=p.v;if(p.v>hi)hi=p.v});
+  var sp=(hi-lo)||S.start*0.002;lo-=sp*0.15;hi+=sp*0.15;
+  var padR=52,padT=8,padB=8,pw=w-padR,Y=function(v){return padT+(1-(v-lo)/(hi-lo))*(h-padT-padB)},X=function(i){return i/(pts.length-1)*pw};
+  var last=pts[pts.length-1].v,col=last>=S.start?C.up:C.dn;
+  ctx.strokeStyle=C.muted;ctx.globalAlpha=.5;ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(0,Math.round(Y(S.start))+0.5);ctx.lineTo(pw,Math.round(Y(S.start))+0.5);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
+  ctx.beginPath();pts.forEach(function(p,i){if(i===0)ctx.moveTo(X(i),Y(p.v));else ctx.lineTo(X(i),Y(p.v))});
+  ctx.strokeStyle=col;ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();ctx.lineWidth=1;
+  ctx.lineTo(X(pts.length-1),h);ctx.lineTo(0,h);ctx.closePath();
+  var g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,col+'40');g.addColorStop(1,col+'00');try{ctx.fillStyle=g;ctx.fill()}catch(e){}
+  ctx.fillStyle=col;ctx.beginPath();ctx.arc(X(pts.length-1),Y(last),3.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=C.muted;ctx.font='10.5px "JetBrains Mono", ui-monospace, monospace';ctx.textAlign='left';
+  var cs_=cinfo().s.trim(),fx_=S.fx||1;ctx.fillText(cs_+nf(hi*fx_,0),pw+8,padT+8);ctx.fillText(cs_+nf(lo*fx_,0),pw+8,h-padB-2);
+}
+function drawSparks(){
+  $$('canvas.spark').forEach(function(cv){
+    var i=BY[cv.dataset.sym];if(!i)return;
+    var f=fitCanvas(cv);if(!f)return;
+    var ctx=f.ctx,w=f.w,h=f.h,C=pal(),a=i.c1.slice(-60).map(function(c){return c.c}),lo=Math.min.apply(null,a),hi=Math.max.apply(null,a),sp=(hi-lo)||1;
+    var col=a[a.length-1]>=a[0]?C.up:C.dn;
+    ctx.beginPath();a.forEach(function(v,k){var x=k/(a.length-1)*w,y=2+(1-(v-lo)/sp)*(h-4);if(k===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});
+    ctx.strokeStyle=col;ctx.lineWidth=1.6;ctx.lineJoin='round';ctx.stroke();
+  });
+}
+function drawActive(){
+  if(view.name==='home')drawEquity();
+  else if(view.name==='markets')drawSparks();
+  else if(view.name==='trade')drawMain();
+}
+
+/* ============ live values ============ */
+function clockStr(){return new Date(simMs).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+function liveVal(key,A){
+  var p=key.split(':'),r,i,pos,pnl;
+  switch(p[0]){
+    case 'a':
+      if(p[1]==='equity')return {t:usd(A.equity)};
+      if(p[1]==='pnl'){r=A.equity-S.start;return {t:susd(r),s:Math.abs(r)<0.005?0:r}}
+      if(p[1]==='pnlpct'){r=(A.equity/S.start-1)*100;return {t:spct(r),s:Math.abs(r)<0.005?0:r}}
+      if(p[1]==='balance')return {t:usd(S.balance)};
+      if(p[1]==='free')return {t:usd(A.free)};
+      if(p[1]==='margin')return {t:usd(A.margin)};
+      if(p[1]==='invest')return {t:usd(A.invest)};
+      if(p[1]==='mlevel')return {t:A.mlevel==null?'—':A.mlevel.toFixed(0)+'%'};
+      return null;
+    case 'clock':return {t:clockStr()};
+    case 'q':
+      i=BY[p[1]];if(!i)return null;
+      if(p[2]==='bid')return {t:fp(i,i.bid)};
+      if(p[2]==='ask')return {t:fp(i,i.ask)};
+      if(p[2]==='mid')return {t:fp(i,i.mid)};
+      if(p[2]==='chg'){r=sessChg(i);return {t:spct(r),s:Math.abs(r)<0.005?0:r}}
+      return null;
+    case 'p':
+      pos=S.positions.find(function(x){return x.id===+p[1]});if(!pos)return null;
+      i=BY[pos.sym];
+      if(p[2]==='px')return {t:fp(i,closePx(pos))};
+      pnl=pnlFor(pos,closePx(pos),pos.units);
+      if(p[2]==='pnl')return {t:susd(pnl),s:Math.abs(pnl)<0.005?0:pnl};
+      if(p[2]==='pct'){r=pnl/Math.max(posCost(pos),0.0001)*100;return {t:spct(r)+(pos.prod==='invest'?'':' on margin'),s:Math.abs(r)<0.005?0:r}}
+      return null;
+  }
+  return null;
+}
+function updateLive(){
+  var A=acct();
+  $$('[data-live]').forEach(function(el){
+    var r=liveVal(el.dataset.live,A);if(!r)return;
+    if(el.textContent!==r.t)el.textContent=r.t;
+    if(el.hasAttribute('data-sign')){var c=r.s>0?'up':(r.s<0?'dn':'');if(el.dataset.c!==c){el.classList.remove('up','dn');if(c)el.classList.add(c);el.dataset.c=c}}
+  });
+}
+
+/* ============ views ============ */
+var ICON={
+  home:'<svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+  markets:'<svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V4M19 20v-6"/></svg>',
+  trade:'<svg viewBox="0 0 24 24"><path d="M7 3v4M7 17v4M17 6v3M17 15v5"/><rect x="5" y="7" width="4" height="10" rx="1"/><rect x="15" y="9" width="4" height="6" rx="1"/></svg>',
+  learn:'<svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/></svg>',
+  coach:'<svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg>',
+  theme:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  pause:'<svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg>',
+  play:'<svg viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg>'
+};
+var NAVS=[['home','Home'],['markets','Markets'],['trade','Trade'],['learn','Learn'],['coach','Coach']];
+function buildChrome(){
+  $('#brandRail').innerHTML=logo(34)+'<span class="word">Gene<b>X</b></span>';
+  $('#logoM').innerHTML=logo(28);
+  $('#navRail').innerHTML=NAVS.map(function(n){return '<button class="nav" data-act="nav" data-v="'+n[0]+'">'+ICON[n[0]]+n[1]+'</button>'}).join('');
+  $('#tabbar').innerHTML=NAVS.map(function(n){return '<button class="tab" data-act="nav" data-v="'+n[0]+'">'+ICON[n[0]]+n[1]+'</button>'}).join('');
+  $('#themeBtn').innerHTML=ICON.theme;setPauseIcon();
+  $('#speedSel').value=String(S.speed);
+}
+function setPauseIcon(){var b=$('#pauseBtn');b.innerHTML=paused?ICON.play:ICON.pause;b.setAttribute('aria-label',paused?'Resume prices':'Pause prices')}
+function setNav(){$$('.nav,.tab').forEach(function(b){b.classList.toggle('on',b.dataset.v===view.name);if(b.dataset.v===view.name)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')})}
+
+function viewHome(){
+  var first=!S.welcomed&&!S.history.length&&!S.positions.length;
+  return (first?'<div class="card welcome"><div><h2>Welcome to GeneX</h2><p class="muted" style="margin-top:4px;max-width:60ch">You have '+usd(S.start,0)+' of paper money. Pick a market, set a stop loss, and the coach checks your risk as you go. Prices are simulated, so there is no real money at stake.</p></div><div class="btnrow"><button class="btn primary" data-act="nav" data-v="markets">Browse markets</button><button class="btn" data-act="lesson" data-id="basics">Start lesson 1</button><button class="btn" data-act="reset">Currency &amp; balance</button><button class="btn ghost" data-act="welcome">Dismiss</button></div></div>':'')+
+  '<section class="card pad hero"><div><div class="eyebrow">Paper account · simulated '+S.cur+'</div><div class="bignum mono" data-live="a:equity"></div>'+
+  '<div class="delta"><b class="mono" data-live="a:pnl" data-sign></b><span class="mono" data-live="a:pnlpct" data-sign></span><span class="muted">since you started with '+usd(S.start,0)+'</span></div></div><canvas id="eqChart" aria-label="Equity curve"></canvas></section>'+
+  '<section class="tiles"><div class="tile"><small>Cash</small><b class="mono" data-live="a:balance"></b></div><div class="tile"><small>Invested</small><b class="mono" data-live="a:invest"></b></div><div class="tile"><small>Margin used</small><b class="mono" data-live="a:margin"></b></div><div class="tile"><small>Free funds</small><b class="mono" data-live="a:free"></b></div><div class="tile"><small>Margin level</small><b class="mono" data-live="a:mlevel"></b></div></section>'+
+  '<section class="card"><div class="cardhead"><div><h3>Coach review</h3><small class="muted">Reads your open positions and results</small></div><button class="btn sm" data-act="nav" data-v="coach">Open coach</button></div><div class="pad coach" id="homeCoach"></div></section>'+
+  '<section class="card"><div class="tabsrow" id="homeTabs"></div><div id="homeList"></div></section>'+
+  '<p class="fine">GeneX is a paper-trading simulator for education. Prices are generated by a simulator and are not live market data. Leverage limits are modelled on UK retail rules. Nothing here is financial advice.'+(BUILT_BY?' Built by '+esc(BUILT_BY)+'.':'')+'</p>';
+}
+function coachHTML(list){return list.map(function(x){return '<div class="cl"><span class="dot '+x.lvl+'"></span><span>'+esc(x.text)+'</span></div>'}).join('')}
+function sizeText(p){return p.prod==='forex'?p.size.toFixed(2)+' lots':(p.prod==='invest'?trimNum(p.size,4)+' sh':trimNum(p.size,2)+' '+(BY[p.sym].unit||'units'))}
+function posRow(p){
+  var i=BY[p.sym];
+  return '<div class="prow"><div class="pname"><button class="symlink" data-act="open" data-sym="'+p.sym+'" data-prod="'+p.prod+'">'+p.sym+'</button><span><span class="badge '+p.side+'">'+(p.side==='buy'?'Buy':'Sell')+'</span> <small class="muted">'+sizeText(p)+(p.prod==='invest'?'':' · 1:'+p.lev)+'</small></span></div>'+
+  '<div class="pcell"><small>Entry</small><span class="mono">'+fp(i,p.entry)+'</span></div>'+
+  '<div class="pcell"><small>Price</small><span class="mono" data-live="p:'+p.id+':px"></span></div>'+
+  '<div class="pcell"><small>P&amp;L</small><span class="mono" data-live="p:'+p.id+':pnl" data-sign></span><i class="mono" data-live="p:'+p.id+':pct" data-sign></i></div>'+
+  '<div class="pcell"><small>Stop / Target</small><span class="mono sm">'+(p.sl!=null?fp(i,p.sl):'—')+' / '+(p.tp!=null?fp(i,p.tp):'—')+'</span></div>'+
+  '<div class="pact"><button class="btn sm" data-act="edit" data-id="'+p.id+'">Edit</button><button class="btn sm" data-act="half" data-id="'+p.id+'" title="Close half">&frac12;</button><button class="btn sm dnb" data-act="close" data-id="'+p.id+'">Close</button></div></div>';
+}
+function orderRow(o){
+  var i=BY[o.sym];
+  return '<div class="prow"><div class="pname"><button class="symlink" data-act="open" data-sym="'+o.sym+'" data-prod="'+o.prod+'">'+o.sym+'</button><span><span class="badge '+o.side+'">'+o.side+' limit</span> <small class="muted">'+sizeText(o)+'</small></span></div>'+
+  '<div class="pcell"><small>Trigger</small><span class="mono">'+fp(i,o.limit)+'</span></div><div class="pcell"><small>Market</small><span class="mono" data-live="q:'+o.sym+':'+(o.side==='buy'?'ask':'bid')+'"></span></div>'+
+  '<div class="pcell"><small>Stop / Target</small><span class="mono sm">'+(o.sl!=null?fp(i,o.sl):'—')+' / '+(o.tp!=null?fp(i,o.tp):'—')+'</span></div><div class="pcell"></div>'+
+  '<div class="pact"><button class="btn sm dnb" data-act="cancel" data-id="'+o.id+'">Cancel</button></div></div>';
+}
+function histStats(){
+  var H=S.history,n=H.length,w=H.filter(function(h){return h.pnl>0}),l=H.filter(function(h){return h.pnl<0});
+  var tot=H.reduce(function(a,h){return a+h.pnl},0),gw=w.reduce(function(a,h){return a+h.pnl},0),gl=Math.abs(l.reduce(function(a,h){return a+h.pnl},0));
+  return {n:n,tot:tot,wr:n?w.length/n*100:0,aw:w.length?gw/w.length:0,al:l.length?gl/l.length:0,pf:gl>0?gw/gl:null,best:n?Math.max.apply(null,H.map(function(h){return h.pnl})):0,worst:n?Math.min.apply(null,H.map(function(h){return h.pnl})):0};
+}
+function emptyBlock(t,btn){return '<div class="empty"><p>'+t+'</p>'+(btn||'')+'</div>'}
+function homeListHTML(){
+  if(view.hl==='pos'){
+    if(!S.positions.length)return emptyBlock('No open positions yet. Pick a market and place your first paper trade.','<button class="btn primary" data-act="nav" data-v="markets">Browse markets</button>');
+    return ['invest','forex','cfd'].map(function(pr){var L=S.positions.filter(function(p){return p.prod===pr});return L.length?'<div class="group">'+prodName(pr)+'</div>'+L.map(posRow).join(''):''}).join('');
+  }
+  if(view.hl==='ord'){
+    return S.orders.length?S.orders.map(orderRow).join(''):emptyBlock('No pending orders. Use a limit order to wait for a better price.');
+  }
+  var s=histStats();
+  if(!s.n)return emptyBlock('Closed trades appear here with your win rate and results.');
+  var st='<div class="stats"><div><small>Trades</small><b class="mono">'+s.n+'</b></div><div><small>Realised</small><b class="mono '+(s.tot>=0?'up':'dn')+'">'+susd(s.tot)+'</b></div><div><small>Win rate</small><b class="mono">'+s.wr.toFixed(0)+'%</b></div><div><small>Avg win</small><b class="mono up">'+usd(s.aw)+'</b></div><div><small>Avg loss</small><b class="mono dn">'+usd(s.al)+'</b></div><div><small>Profit factor</small><b class="mono">'+(s.pf==null?'—':s.pf.toFixed(2))+'</b></div></div>';
+  return st+S.history.slice(0,60).map(function(h){var i=BY[h.sym];
+    return '<div class="prow"><div class="pname"><button class="symlink" data-act="open" data-sym="'+h.sym+'" data-prod="'+h.prod+'">'+h.sym+'</button><span><span class="badge '+h.side+'">'+(h.side==='buy'?'Buy':'Sell')+'</span> <small class="muted">'+sizeText(h)+'</small></span></div>'+
+    '<div class="pcell"><small>Entry</small><span class="mono">'+fp(i,h.entry)+'</span></div><div class="pcell"><small>Exit</small><span class="mono">'+fp(i,h.exit)+'</span></div>'+
+    '<div class="pcell"><small>P&amp;L</small><span class="mono '+(h.pnl>=0?'up':'dn')+'">'+susd(h.pnl)+'</span>'+(h.risk>0?'<i class="mono muted">'+(h.pnl/h.risk).toFixed(1)+'R</i>':'')+'</div>'+
+    '<div class="pcell"><small>Closed</small><span class="sm">'+new Date(h.closedAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})+'</span></div>'+
+    '<div class="pact"><span class="badge '+(h.reason==='stop-out'?'sell':(h.reason==='manual'?'n':'acc'))+'">'+h.reason.replace('-',' ')+'</span></div></div>'}).join('');
+}
+function renderLists(){
+  var t=$('#homeTabs');
+  if(t)t.innerHTML=[['pos','Positions',S.positions.length],['ord','Pending orders',S.orders.length],['hist','History',S.history.length]].map(function(x){return '<button class="'+(view.hl===x[0]?'on':'')+'" data-act="hl" data-v="'+x[0]+'">'+x[1]+' ('+x[2]+')</button>'}).join('');
+  var hl=$('#homeList');if(hl)hl.innerHTML=homeListHTML();
+  var tp=$('#tPositions');if(tp)tp.innerHTML=tradePosHTML();
+  var hc=$('#homeCoach');if(hc)hc.innerHTML=coachHTML(coachPortfolio());
+  updateLive();
+}
+function tradePosHTML(){
+  var P=S.positions.filter(function(p){return p.sym===view.sym}),O=S.orders.filter(function(o){return o.sym===view.sym});
+  var h='<div class="cardhead"><h3>Your '+view.sym+' trades</h3><small class="muted">'+P.length+' open · '+O.length+' pending</small></div>';
+  if(!P.length&&!O.length)return h+'<div class="empty"><p>Nothing open on this market. Use the ticket to place a trade.</p></div>';
+  return h+P.map(posRow).join('')+O.map(orderRow).join('');
+}
+
+function viewMarkets(){
+  var subs={invest:['All','Shares','ETFs'],forex:['All'],cfd:['All','Indices','Commodities','Shares']}[view.mTab];
+  return '<div class="mhead"><div><h2>Markets</h2><small class="muted">Simulated prices · session change since the chart began</small></div><input class="search" id="mSearch" type="search" placeholder="Search symbol or name" value="'+esc(view.mQ)+'" aria-label="Search markets"></div>'+
+  '<div class="mhead"><div class="seg" role="tablist">'+[['invest','Invest'],['forex','Forex'],['cfd','CFD']].map(function(x){return '<button class="'+(view.mTab===x[0]?'on':'')+'" data-act="mtab" data-v="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>'+
+  '<div class="chips">'+(subs.length>1?subs.map(function(s){return '<button class="chip '+(view.mSub===s?'on':'')+'" data-act="msub" data-v="'+s+'">'+s+'</button>'}).join(''):'')+'</div></div>'+
+  '<div class="card" id="mList"></div>'+
+  '<p class="fine">'+({invest:'Invest means you own the shares or fund units. No leverage, long-only, and you cannot lose more than you put in.',forex:'Forex pairs are leveraged up to 1:30 here, modelled on UK retail limits. Size is measured in lots of 100,000 units.',cfd:'CFDs are leveraged contracts on price changes. You can go long or short. Leverage caps here: 1:20 indices and gold, 1:10 oil, 1:5 shares.'})[view.mTab]+'</p>';
+}
+function marketList(){
+  var q=view.mQ.trim().toLowerCase(),L=INST.filter(function(i){
+    if(view.mTab==='invest'&&i.prods.indexOf('invest')<0)return false;
+    if(view.mTab==='forex'&&i.cls!=='forex')return false;
+    if(view.mTab==='cfd'&&i.prods.indexOf('cfd')<0)return false;
+    if(view.mSub!=='All'&&i.sub!==view.mSub)return false;
+    return !q||i.sym.toLowerCase().indexOf(q)>=0||i.name.toLowerCase().indexOf(q)>=0;
+  });
+  L.sort(function(a,b){return (S.watch.indexOf(b.sym)>=0)-(S.watch.indexOf(a.sym)>=0)});
+  if(!L.length)return '<div class="empty"><p>No markets match that search.</p></div>';
+  var prod=view.mTab;
+  return L.map(function(i,n){var on=S.watch.indexOf(i.sym)>=0;
+    return '<div class="mrow" style="'+(n===0?'border-top:0':'')+'" data-act="open" data-sym="'+i.sym+'" data-prod="'+prod+'" role="button" tabindex="0"><button class="star '+(on?'on':'')+'" data-act="star" data-sym="'+i.sym+'" aria-label="'+(on?'Remove from':'Add to')+' watchlist" aria-pressed="'+on+'">'+(on?'★':'☆')+'</button>'+
+    '<div class="mname"><b>'+i.sym+'</b><small>'+esc(i.name)+'</small></div><canvas class="spark" data-sym="'+i.sym+'"></canvas>'+
+    '<div class="num mono" data-live="q:'+i.sym+':bid"></div><div class="num mono" data-live="q:'+i.sym+':chg" data-sign></div></div>'}).join('');
+}
+
+function viewTrade(){
+  var i=BY[view.sym];
+  var opts=GROUPS.map(function(g){return '<optgroup label="'+g[0]+'">'+INST.filter(function(x){return x.cls===g[1]}).map(function(x){return '<option value="'+x.sym+'"'+(x.sym===view.sym?' selected':'')+'>'+x.sym+' · '+esc(x.name)+'</option>'}).join('')+'</optgroup>'}).join('');
+  return '<div class="tgrid"><section class="tmain"><div class="card"><div class="thead"><div><div class="tsym">'+i.sym+' <span class="badge n" style="vertical-align:middle">'+prodName(view.prod)+'</span></div><small class="muted">'+esc(i.name)+'</small></div>'+
+  '<div class="tpx mono"><span data-live="q:'+i.sym+':mid"></span><span class="sm" data-live="q:'+i.sym+':chg" data-sign></span></div></div>'+
+  '<div class="thead" style="padding-top:6px"><div class="ctrls"><select class="sel" id="symSel" aria-label="Choose market">'+opts+'</select>'+
+  (i.prods.length>1?'<div class="seg">'+i.prods.map(function(p){return '<button class="'+(view.prod===p?'on':'')+'" data-act="prod" data-v="'+p+'">'+prodName(p)+'</button>'}).join('')+'</div>':'')+'</div>'+
+  '<div class="ctrls"><div class="seg">'+[1,5,15].map(function(t){return '<button class="'+(view.tf===t?'on':'')+'" data-act="tf" data-v="'+t+'">'+t+'m</button>'}).join('')+'</div>'+
+  '<div class="seg">'+[['candle','Candles'],['line','Line']].map(function(t){return '<button class="'+(view.type===t[0]?'on':'')+'" data-act="ctype" data-v="'+t[0]+'">'+t[1]+'</button>'}).join('')+'</div><div class="seg"><button class="'+(view.sma?'on':'')+'" data-act="sma">SMA 20</button></div></div></div>'+
+  '<div class="chartbox"><canvas id="mainChart" aria-label="Price chart for '+i.sym+'"></canvas><div class="ohlc" id="ohlc"></div></div></div>'+
+  '<div class="card" id="tPositions"></div></section>'+
+  '<aside class="card ticket" id="ticket"></aside></div>';
+}
+function fld(label,id,inner){return '<div class="fl"><label for="'+id+'">'+label+'</label>'+inner+'</div>'}
+function ticketHTML(){
+  var i=BY[view.sym],prod=view.prod,lev=prod!=='invest',h='';
+  h+='<div class="sides"><button class="side sell '+(T.side==='sell'?'on':'')+' '+(prod==='invest'?'off':'')+'" data-act="side" data-v="sell"><small>Sell</small><b class="mono" data-live="q:'+i.sym+':bid"></b></button>'+
+     '<button class="side buy '+(T.side==='buy'?'on':'')+'" data-act="side" data-v="buy"><small>Buy</small><b class="mono" data-live="q:'+i.sym+':ask"></b></button></div>';
+  h+='<div class="seg" style="align-self:flex-start"><button class="'+(T.type==='market'?'on':'')+'" data-act="otype" data-v="market">Market</button><button class="'+(T.type==='limit'?'on':'')+'" data-act="otype" data-v="limit">Limit</button></div>';
+  if(T.type==='limit')h+=fld('Limit price','tLimit','<input class="inp" id="tLimit" data-f="limit" inputmode="decimal" value="'+esc(T.limit)+'" placeholder="'+fp(i,T.side==='buy'?i.ask-hourRange(i)*0.25:i.bid+hourRange(i)*0.25)+'"><small class="muted">'+(T.side==='buy'?'Buys when the ask falls to this price.':'Sells when the bid rises to this price.')+'</small>');
+  if(prod==='invest'){
+    h+='<div class="fl"><label for="tSize">Amount</label><div class="seg" style="align-self:flex-start"><button class="'+(T.mode==='amt'?'on':'')+'" data-act="mode" data-v="amt">'+cinfo().s.trim()+' Amount</button><button class="'+(T.mode==='sh'?'on':'')+'" data-act="mode" data-v="sh">Shares</button></div><input class="inp" id="tSize" data-f="size" inputmode="decimal" value="'+esc(T.size)+'"><div class="chips">'+(T.mode==='amt'?amtChips():[1,5,10,50]).map(function(c){return '<button class="chip" data-act="chip" data-v="'+c+'">'+(T.mode==='amt'?cinfo().s+nf(c,0):c)+'</button>'}).join('')+'</div></div>';
+  }else{
+    var chips=prod==='forex'?[0.01,0.05,0.1,0.5]:i.chips,st=prod==='forex'?0.01:i.minUnit;
+    h+='<div class="fl"><label for="tSize">'+(prod==='forex'?'Size (lots)':'Size ('+i.unit+')')+'</label><div class="stepper"><button class="btn" data-act="step" data-d="-1" aria-label="Decrease size">−</button><input class="inp" id="tSize" data-f="size" inputmode="decimal" value="'+esc(T.size)+'" data-step="'+st+'"><button class="btn" data-act="step" data-d="1" aria-label="Increase size">+</button></div><div class="chips">'+chips.map(function(c){return '<button class="chip" data-act="chip" data-v="'+c+'">'+c+'</button>'}).join('')+'</div></div>';
+    h+=fld('Leverage','tLev','<select class="sel" id="tLev" data-f="lev">'+levOptions(maxLev(i,prod)).map(function(n){return '<option value="'+n+'"'+(T.lev===n?' selected':'')+'>1:'+n+'</option>'}).join('')+'</select>');
+  }
+  h+='<div class="two">'+fld('Stop loss','tSL','<input class="inp" id="tSL" data-f="sl" inputmode="decimal" value="'+esc(T.sl)+'" placeholder="Price">')+fld('Take profit','tTP','<input class="inp" id="tTP" data-f="tp" inputmode="decimal" value="'+esc(T.tp)+'" placeholder="Price">')+'</div>';
+  h+='<div class="chips"><span class="lbl" style="align-self:center">Stop</span><button class="chip" data-act="slchip" data-v="0.5">Tight</button><button class="chip" data-act="slchip" data-v="1">Normal</button><button class="chip" data-act="slchip" data-v="2">Wide</button><span class="lbl" style="align-self:center;margin-left:6px">Target</span><button class="chip" data-act="tpchip" data-v="1">1R</button><button class="chip" data-act="tpchip" data-v="2">2R</button><button class="chip" data-act="tpchip" data-v="3">3R</button></div>';
+  h+='<button class="btn" data-act="risksize">Size for 1% risk</button>';
+  h+='<div class="sumtab" id="tSum"></div>';
+  h+='<div class="coachbox"><div class="hd"><span class="eyebrow">GeneX coach</span><button class="btn sm" data-act="aiask">Ask the AI coach</button></div><div class="coach" id="tCoach"></div></div>';
+  h+='<div class="err" id="tErr" role="status"></div><button class="btn primary" id="tPlace" data-act="place">Place order</button>';
+  return h;
+}
+var lastSum='',lastCoach='';
+function updateTicketDyn(){
+  if(view.name!=='trade'||!$('#tSum'))return;
+  var m=metrics(),i=m.inst,prod=m.prod,rows=[];
+  rows.push(['Entry price',fp(i,m.entry)]);
+  rows.push(['Position value',usd(m.notional)]);
+  rows.push([prod==='invest'?'Cost':'Margin required',usd(prod==='invest'?m.cost:m.margin)]);
+  var sp=i.cls==='forex'?nf(i.spread/i.pip,1)+' pips':(i.cls==='stock'||i.cls==='etf'?'$'+nf(i.spread,2):nf(i.spread,i.dec)+' pts');
+  rows.push(['Spread',sp+' · '+usd(m.spreadCost)]);
+  if(prod==='forex'&&m.o.units>0)rows.push(['Pip value',usd(i.pip*m.o.units*convUSD(i,m.entry))]);
+  if(m.riskUSD!=null)rows.push(['Risk at stop','<span class="dn">'+usd(m.riskUSD)+' · '+nf(m.riskPct,1)+'%</span>']);
+  if(m.rewardUSD!=null)rows.push(['Reward at target','<span class="up">'+usd(m.rewardUSD)+'</span>']);
+  if(m.rr!=null)rows.push(['Reward : risk','1 : '+m.rr.toFixed(2)]);
+  rows.push(['Free funds after',usd(m.freeAfter)]);
+  var sum=rows.map(function(r){return '<div class="sumrow"><span>'+r[0]+'</span><span class="mono">'+r[1]+'</span></div>'}).join('');
+  if(sum!==lastSum){$('#tSum').innerHTML=sum;lastSum=sum}
+  var co=coachHTML(coachTicket(m));if(co!==lastCoach){$('#tCoach').innerHTML=co;lastCoach=co}
+  var o=m.o,txt=(o.side==='buy'?'Buy ':'Sell ')+(prod==='forex'?o.size.toFixed(2)+' lots':(prod==='invest'?(o.units>0?trimNum(o.units,4)+' sh':'shares'):trimNum(o.size,2)+' '+i.unit))+' '+i.sym+(T.type==='limit'&&o.limit?' @ '+fp(i,o.limit):'');
+  var b=$('#tPlace');if(b){if(b.textContent!==txt)b.textContent=txt;b.disabled=!!m.err}
+  var er=$('#tErr');if(er&&er.textContent!==(m.err||''))er.textContent=m.err||'';
+}
+function viewLearn(){
+  if(view.lesson)return viewLesson();
+  var done=LESSONS.filter(function(l){return S.lessons[l.id]&&S.lessons[l.id].done}).length,n=0;
+  var h='<div class="mhead"><div><h2>Learn</h2><small class="muted">'+LESSONS.length+' short lessons in three tracks. Each ends with a quiz and a market to practise on.</small></div><div style="min-width:180px;display:grid;gap:6px"><small class="muted">'+done+' of '+LESSONS.length+' complete</small><div class="prog"><i style="width:'+(done/LESSONS.length*100)+'%"></i></div></div></div>';
+  TRACKS.forEach(function(t){
+    h+='<div><h3 style="font-size:19px;margin:6px 0 12px">'+t[0]+'</h3><div class="lgrid">'+t[1].map(function(id){var l=LBYID[id],r=S.lessons[id];n++;
+      return '<button class="lcard" data-act="lesson" data-id="'+l.id+'"><span class="lnum">Lesson '+n+' \u00B7 '+l.time+'</span><h3>'+l.title+'</h3><p>'+l.sum+'</p><span>'+(r&&r.done?'<span class="badge buy">Passed '+r.score+'/'+l.quiz.length+'</span>':(r?'<span class="badge w">Score '+r.score+'/'+l.quiz.length+' \u00B7 retry</span>':'<span class="badge acc">Start</span>'))+'</span></button>'}).join('')+'</div></div>';
+  });
+  return h+'<p class="fine">Dollar amounts in lesson examples are illustrations. Your account can use any currency.</p>';
+}
+function viewLesson(){
+  var n=LESSONS.findIndex(function(l){return l.id===view.lesson}),l=LESSONS[n];
+  return '<div class="reader"><div class="btnrow"><button class="btn sm" data-act="lessons">&larr; All lessons</button></div><div><span class="lnum">Lesson '+(n+1)+' · '+l.time+'</span><h2 style="margin-top:4px;font-size:30px">'+l.title+'</h2></div>'+
+  l.body.map(function(p){return '<p>'+p+'</p>'}).join('')+
+  '<div class="btnrow"><button class="btn" data-act="open" data-sym="'+l.sym+'" data-prod="'+l.prod+'">Practise on '+l.sym+'</button></div>'+
+  '<h3 style="margin-top:8px">Check your understanding</h3>'+
+  l.quiz.map(function(q,qi){return '<div class="q" id="q'+qi+'"><b>'+q.q+'</b>'+q.o.map(function(o,oi){return '<label><input type="radio" name="q'+qi+'" value="'+oi+'"> <span>'+o+'</span></label>'}).join('')+'<div class="ex" hidden></div></div>'}).join('')+
+  '<div class="btnrow"><button class="btn primary" data-act="quiz">Check answers</button><span id="quizOut" class="muted" style="align-self:center"></span></div></div>';
+}
+function viewCoach(){
+  return '<div class="mhead"><div><h2>Coach</h2><small class="muted">Ask about your trades, or any concept. Answers use your live account.</small></div><span id="aiBadge" class="badge n">Checking AI…</span></div>'+
+  '<div id="keyBox"></div>'+
+  '<div class="cgrid"><section class="card"><div class="chatlog" id="chatLog"></div><div class="pad" style="padding-block:0 12px"><div class="chips" id="chatChips"></div></div><form class="chatform" id="chatForm"><input class="inp" id="chatIn" autocomplete="off" placeholder="Ask the coach anything" aria-label="Message to coach" style="font-family:var(--f-body)"><button class="btn primary" type="submit">Send</button></form></section>'+
+  '<section class="card"><div class="cardhead"><h3>Coach notes</h3><button class="btn sm" data-act="review">Review my account</button></div><div id="feedList"></div></section></div>';
+}
+function renderFeed(){
+  var f=$('#feedList');if(!f)return;
+  f.innerHTML=S.feed.length?S.feed.slice(0,20).map(function(x){return '<div class="feeditem"><div class="cl"><span class="dot '+x.kind+'"></span><span>'+esc(x.text)+'</span></div><small class="muted" style="margin-left:17px">'+new Date(x.t).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})+'</small></div>'}).join(''):'<div class="empty"><p>Notes from the coach appear here when you open and close trades.</p></div>';
+}
+
+/* ============ AI coach ============ */
+var setupCur='USD';
+function setupHTML(){
+  var c=CUR[setupCur],first=!S.history.length&&!S.positions.length;
+  var v0=S.cur===setupCur?Math.round(S.start*S.fx):10000*c.sc;if(!(v0>0))v0=10000*c.sc;
+  var pre=[1000,5000,10000,25000,100000].map(function(b){return b*c.sc});
+  return '<h3>'+(first?'Set up your paper account':'Reset your paper account')+'</h3><p class="muted">'+(first?'Choose your currency and how much paper money to start with.':'This clears all positions, orders and history and starts again. Lesson progress is kept.')+'</p>'+
+  '<div class="fl"><label for="rsCur">Account currency</label><select class="sel" id="rsCur">'+Object.keys(CUR).map(function(k){return '<option value="'+k+'"'+(k===setupCur?' selected':'')+'>'+k+' \u00B7 '+CUR[k].n+'</option>'}).join('')+'</select><small class="muted">Converted once at the current simulated rate. Market prices still quote in their own currency.</small></div>'+
+  '<div class="fl"><label for="rsAmt">Starting balance</label><input class="inp" id="rsAmt" inputmode="decimal" value="'+v0+'"><div class="chips">'+pre.map(function(p){return '<button class="chip" data-act="rspreset" data-v="'+p+'">'+c.s+nf(p,0)+'</button>'}).join('')+'</div></div><div class="err" id="rsErr"></div>'+
+  '<div class="btnrow"><button class="btn primary" data-act="doreset">'+(first?'Start trading':'Reset account')+'</button><button class="btn" data-act="mclose">Cancel</button></div>';
+}
+var chat=[],aiState='unknown',samplePromise=null;
+function getSample(){
+  if(!samplePromise){
+    samplePromise=(window.claude&&window.claude.use?window.claude.use('sample'):Promise.resolve(null)).then(function(s){aiState=s?'on':'off';setAiBadge();return s}).catch(function(){aiState='off';setAiBadge();return null});
+  }
+  return samplePromise;
+}
+function setAiBadge(){var b=$('#aiBadge');if(!b)return;var on=aiState==='on'||(!inClaude()&&!!getKey());b.textContent=on?'AI coach on':'Built-in coach';b.className='badge '+(on?'acc':'n')}
+function snapshot(){
+  var A=acct(),L=['Equity '+usd(A.equity)+', cash '+usd(S.balance)+', free funds '+usd(A.free)+', margin used '+usd(A.margin)+(A.mlevel!=null?', margin level '+A.mlevel.toFixed(0)+'%':'')+'. Started with '+usd(S.start,0)+'. All amounts are in '+S.cur+'.'];
+  if(S.positions.length){L.push('Open positions:');S.positions.forEach(function(p){var i=BY[p.sym];L.push('- '+p.side.toUpperCase()+' '+sizeText(p)+' '+p.sym+' ('+prodName(p.prod)+(p.prod==='invest'?'':', 1:'+p.lev)+') entry '+fp(i,p.entry)+', now '+fp(i,closePx(p))+', P&L '+susd(pnlFor(p,closePx(p),p.units))+', stop '+(p.sl!=null?fp(i,p.sl):'none')+', target '+(p.tp!=null?fp(i,p.tp):'none'))})}
+  else L.push('No open positions.');
+  if(S.history.length){L.push('Last closed trades:');S.history.slice(0,5).forEach(function(h){L.push('- '+h.side+' '+h.sym+' '+susd(h.pnl)+' ('+h.reason+')')})}
+  return L.join('\n');
+}
+var AI_INSTR='You are GeneX Coach, a patient trading teacher inside a paper-trading app for beginners. All prices and money are simulated. Explain plainly, tie your answer to the student\'s actual positions in the snapshot where relevant, and emphasise risk management (position sizing, stop losses, leverage, margin). Never promise profits and never tell the student what to buy with real money. Answer in under 140 words as plain text with no markdown headings or bullet symbols.';
+function chatMsgHTML(m){return '<span class="by">'+(m.role==='u'?'You':'Coach · '+(m.ai?'AI':'Built-in'))+'</span>'+esc(m.text||'…')}
+function renderChat(){
+  var l=$('#chatLog');if(!l)return;
+  l.innerHTML=chat.map(function(m,n){return '<div class="msg '+m.role+'" data-m="'+n+'">'+chatMsgHTML(m)+'</div>'}).join('');
+  l.scrollTop=l.scrollHeight;
+}
+function updateMsg(n){var m=chat[n],el=$('.msg[data-m="'+n+'"]');if(el){el.innerHTML=chatMsgHTML(m);var l=$('#chatLog');if(l)l.scrollTop=l.scrollHeight}}
+var asking=false;
+function getKey(){try{return localStorage.getItem('genex.key')||''}catch(e){return ''}}
+function inClaude(){return !!(window.claude&&window.claude.use)}
+function callClaudeKey(body){
+  return fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:500,system:AI_INSTR,messages:[{role:'user',content:body}]})}).then(function(r){
+    return r.json().then(function(j){
+      if(!r.ok)throw {code:r.status===401?'bad_key':'http',message:(j&&j.error&&j.error.message)||('HTTP '+r.status)};
+      return (j.content||[]).map(function(c){return c.text||''}).join('').trim();
+    });
+  });
+}
+function coachFinish(msg,idx,text,ai,note){msg.text=text+(note?'\n\n'+note:'');msg.ai=ai;updateMsg(idx);asking=false}
+function coachAsk(q){
+  q=String(q||'').trim();if(!q||asking)return;
+  var hist=chat.slice(-6).map(function(m){return (m.role==='u'?'Student: ':'Coach: ')+m.text}).join('\n');
+  chat.push({role:'u',text:q});
+  var msg={role:'c',text:'',ai:false};chat.push(msg);var idx=chat.length-1;renderChat();
+  asking=true;
+  var body='ACCOUNT SNAPSHOT (simulated):\n'+snapshot()+'\n\n'+(hist?'CONVERSATION SO FAR:\n'+hist+'\n\n':'')+'Student: '+q;
+  getSample().then(function(sample){
+    if(sample){
+      return sample(AI_INSTR+'\n\n'+body+'\nCoach:',{cache:false,onText:function(r){msg.ai=true;msg.text=r.text;updateMsg(idx)}}).then(function(res){
+        coachFinish(msg,idx,(res&&res.text)||msg.text||localAnswer(q),true);
+      }).catch(function(err){
+        coachFinish(msg,idx,(msg.text&&msg.text.length>20?msg.text+'\n\n':'')+localAnswer(q),false,err&&err.code==='not_granted'?'(The AI coach needs your permission to run. The built-in coach answered instead.)':(err&&err.code==='rate_limited'?'(The AI coach is busy. The built-in coach answered.)':''));
+      });
+    }
+    if(getKey()){
+      return callClaudeKey(body).then(function(t){coachFinish(msg,idx,t||localAnswer(q),!!t)}).catch(function(err){
+        coachFinish(msg,idx,localAnswer(q),false,err&&err.code==='bad_key'?'(Your API key was rejected, so the built-in coach answered. Reconnect with a valid key.)':'(Could not reach Claude: '+((err&&err.message)||'network error')+'. The built-in coach answered.)');
+      });
+    }
+    coachFinish(msg,idx,localAnswer(q),false);
+  }).catch(function(){asking=false});
+}
+function renderKeyBox(){
+  var b=$('#keyBox');if(!b)return;
+  if(inClaude()){b.innerHTML='';return}
+  var has=!!getKey();
+  b.innerHTML='<div class="card pad" style="display:grid;gap:10px"><div><b>'+(has?'Claude connected':'Connect your Claude API key')+'</b><p class="muted sm" style="margin-top:3px;max-width:70ch">'+(has?'Your key is saved in this browser only. Coach questions are sent to Anthropic and billed to your API account.':'For real AI answers, paste an Anthropic API key. It stays in this browser and is only sent to api.anthropic.com. Usage is billed to your own API account. A Claude chat subscription cannot be used here. Use a key with a low spend limit and avoid shared computers.')+'</p></div>'+
+    (has?'<div class="btnrow"><button class="btn" data-act="keyclear">Disconnect</button></div>':'<div class="btnrow" style="flex-wrap:nowrap"><input class="inp" id="keyIn" type="password" autocomplete="off" placeholder="sk-ant-..." aria-label="Anthropic API key"><button class="btn primary" data-act="keysave">Connect</button></div><a class="sm" href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Get an API key</a>')+'<div class="err" id="keyErr"></div></div>';
+}
+function chipsFor(){return ['Review my account','Explain margin and stop-out','How big should my position be?','What does leverage do?','Why do trades start in the red?']}
+
+/* ============ lessons ============ */
+var LESSONS=[
+{id:'basics',title:'How paper trading works',time:'3 min',sum:'Simulated money, real habits. The loop you should practise on every trade.',sym:'AAPL',prod:'invest',
+ body:['Paper trading uses simulated money in a simulated market. You practise placing orders, sizing positions and managing risk without risking cash. The skills transfer. The feelings do not: real money makes losses hurt more, so build good habits now.','Prices in GeneX come from a market simulator, not from live exchanges. Use it to learn mechanics, not to predict real markets.','A simple loop to practise on every trade: decide why you are entering, choose a stop loss before you click, size the position so a stop-out costs 1 to 2% of your account, then review the result when you close.'],
+ quiz:[{q:'What is the main benefit of paper trading?',o:['It guarantees profits later','Practising mechanics and habits without risking cash','It predicts real prices','It avoids all losses'],a:1,e:'You rehearse order entry, sizing and risk control. It cannot guarantee results.'},
+  {q:'What should you decide before opening a trade?',o:['Your exit plan, including a stop loss','Nothing, decide after','The exact final profit','Which friend to tell'],a:0,e:'A plan made before you are in the trade is not bent by fear or hope.'},
+  {q:'Why can paper results look better than real results?',o:['Paper accounts use different maths','Real trading adds slippage and real emotions','Real markets are always closed','Paper trading is always harder'],a:1,e:'Real fills can be worse than the price you saw, and money on the line changes behaviour.'}]},
+{id:'spread',title:'Bid, ask and the spread',time:'3 min',sum:'Why every new trade starts slightly negative and what that costs you.',sym:'EURUSD',prod:'forex',
+ body:['Every market has two prices. The bid is what buyers will pay, so it is the price you get when you sell. The ask is what sellers want, so it is the price you pay when you buy.','The gap between them is the spread, and it is the main cost of a commission-free trade. If EURUSD shows bid 1.08495 and ask 1.08505, the spread is 0.0001, which is 1 pip.','Because you buy at the ask and the position is valued at the bid, every trade starts slightly negative. A tighter spread means a cheaper trade.'],
+ quiz:[{q:'You open a Buy order. Which price do you get?',o:['The bid','The ask','The mid price','The last close'],a:1,e:'Buyers pay the ask. Sellers receive the bid.'},
+  {q:'EURUSD bid is 1.0850 and ask is 1.0852. What is the spread in pips?',o:['0.2','2','20','0.02'],a:1,e:'The gap is 0.0002 and one pip is 0.0001, so the spread is 2 pips.'},
+  {q:'Why does a new trade show a small loss straight away?',o:['Markets always move against you','You entered at the ask but the position is valued at the bid','There is a hidden fee','It is a bug'],a:1,e:'That small gap is the spread, paid as soon as you enter.'}]},
+{id:'leverage',title:'Leverage and margin',time:'4 min',sum:'How borrowed buying power magnifies results and what a stop-out is.',sym:'US500',prod:'cfd',
+ body:['Leverage lets you control a position larger than your cash. With 1:20 leverage a $10,000 position needs $500 of margin, which is the deposit held while the trade is open.','Leverage magnifies gains and losses equally. A 1% move on a position 20 times your margin is a 20% change on that margin.','Margin level is your equity divided by margin used. Under 100% you are in margin call territory, and GeneX closes your worst trade automatically below 50%. That is a stop-out.'],
+ quiz:[{q:'A $10,000 position at 1:20 leverage needs how much margin?',o:['$20','$500','$2,000','$10,000'],a:1,e:'$10,000 divided by 20 is $500.'},
+  {q:'What does leverage do to losses?',o:['Reduces them','Magnifies them as much as gains','Nothing','Removes them'],a:1,e:'It works in both directions, which is why size and stops matter.'},
+  {q:'Margin level falls below the stop-out level. What happens?',o:['Nothing','Positions are closed automatically','Your balance is topped up','Orders are doubled'],a:1,e:'The platform closes the worst position first to protect your account.'}]},
+{id:'risk',title:'Stop losses and risk per trade',time:'4 min',sum:'Position sizing from the stop distance, and why 1:2 reward-to-risk helps.',sym:'XAUUSD',prod:'cfd',
+ body:['Professional traders think about what they can lose before what they can win. A common rule is to risk 1 to 2% of the account on any single trade.','Position size is the money you will accept losing divided by the distance to your stop. With $10,000 and 1% risk you accept $100. If your stop is $5 per unit away, you can trade 20 units. The Size for 1% risk button in the ticket does this sum.','Reward-to-risk compares your target to your stop. At 1:2 you win twice what you risk, so you can be right on only about one trade in three and still break even.'],
+ quiz:[{q:'Equity is $10,000 and you risk 1%. What is the maximum loss?',o:['$10','$100','$1,000','$500'],a:1,e:'1% of $10,000 is $100.'},
+  {q:'You risk $100 and your stop is 4 points per unit away. How many units?',o:['10','25','40','4'],a:1,e:'$100 divided by $4 per unit is 25 units.'},
+  {q:'At 1:3 reward-to-risk, roughly what win rate breaks even?',o:['25%','33%','50%','75%'],a:0,e:'Break-even win rate is 1 divided by (1 + 3), which is 25%.'}]},
+{id:'forex',title:'Forex: pips, lots and pairs',time:'4 min',sum:'Base and quote currencies, pip value and what a lot really is.',sym:'GBPUSD',prod:'forex',
+ body:['Forex trades currencies in pairs. In EURUSD, EUR is the base and USD is the quote: the price is how many dollars one euro costs.','A pip is the usual smallest quoted move, 0.0001 for most pairs and 0.01 for pairs with the yen. A standard lot is 100,000 units of the base currency, so one pip on 1 lot of EURUSD is about $10, and a 0.10 lot is about $1 per pip.','Real forex trades around the clock on weekdays. GeneX runs continuously so you can always practise.'],
+ quiz:[{q:'In EURUSD, which is the base currency?',o:['USD','EUR','Both','Neither'],a:1,e:'The first currency in the pair is the base.'},
+  {q:'About how much is one pip worth on a 0.10 lot of EURUSD?',o:['$0.10','$1','$10','$100'],a:1,e:'1 lot is about $10 per pip, so 0.10 lot is about $1.'},
+  {q:'How many units are in a standard lot?',o:['1,000','10,000','100,000','1,000,000'],a:2,e:'A standard lot is 100,000 units of the base currency.'}]},
+{id:'cfd',title:'CFDs versus investing',time:'4 min',sum:'Ownership versus contracts, and the leverage limits that apply to UK retail traders.',sym:'TSLA',prod:'cfd',
+ body:['Investing means owning the asset. If you buy $500 of shares you can lose at most $500, and you can hold for as long as you like.','A CFD, or contract for difference, is an agreement to exchange the change in price. You never own the asset, you can go long or short, and you trade with leverage. That makes gains and losses bigger and faster.','UK retail leverage is capped by the FCA, for example 30:1 on major currency pairs, 20:1 on major indices and gold, 10:1 on other commodities and 5:1 on shares. GeneX models these limits.'],
+ quiz:[{q:'You buy shares in Invest mode. What is your maximum loss?',o:['Unlimited','The amount you invested','Double the amount','Zero'],a:1,e:'Shares cannot go below zero, so you lose at most what you paid.'},
+  {q:'Which lets you profit from a falling price most easily?',o:['Buying shares only','Selling (shorting) a CFD','A savings account','Waiting'],a:1,e:'A CFD lets you take a short position just by selling.'},
+  {q:'What is the maximum leverage on a share CFD in GeneX?',o:['1:2','1:5','1:30','1:100'],a:1,e:'Shares are capped at 5:1, matching UK retail limits.'}]}
+,{id:'orders',title:'Order types: market, limit, stop, target',time:'3 min',sum:'Choose how and when a trade is entered and exited.',sym:'MSFT',prod:'cfd',
+ body:['A market order trades straight away at the best available price: the ask when you buy and the bid when you sell. It is fast, but you accept whatever price is showing.','A limit order waits for a price you choose. A buy limit sits below the market and fills if price falls to it. A sell limit sits above. You may get a better price, but the trade might never fill.','A stop loss closes a trade when price moves against you to a level you set. A take profit closes it when price reaches your target. Set both when you open and the trade manages itself while you are away. When prices jump, a stop can fill at a worse price than you set. That gap is called slippage.'],
+ quiz:[{q:'Where does a buy limit order sit?',o:['Above the market','Below the market','Exactly at the bid, always','It does not use a price'],a:1,e:'A buy limit waits for price to fall to your chosen level.'},
+  {q:'What is the main downside of a limit order?',o:['It always fills at a worse price','It may never fill','It costs an extra fee','You cannot add a stop'],a:1,e:'If price never reaches your level, the order stays unfilled.'},
+  {q:'What does a take profit do?',o:['Closes the trade when price reaches your target','Opens a second trade','Moves your stop loss','Removes the spread'],a:0,e:'It locks in the gain at the price you planned.'}]},
+{id:'candles',title:'Reading candlesticks',time:'3 min',sum:'What the bodies and wicks on the chart actually tell you.',sym:'EURUSD',prod:'forex',
+ body:['Each candle summarises one period of time. The body runs from the open to the close, and the thin wicks show the highest and lowest price reached. A green candle closed above its open. A red one closed below it.','A long body means strong one-sided movement. A long wick means price went there and was pushed back. A tiny body with wicks on both sides shows indecision.','The timeframe sets what one candle covers. GeneX offers 1, 5 and 15 minutes. Short timeframes are noisy and longer ones show the bigger picture, so check a longer timeframe before trusting a short one.'],
+ quiz:[{q:'What do the wicks of a candle show?',o:['The open and close','The highest and lowest price in the period','The trading volume','The spread'],a:1,e:'The wicks mark the extremes. The body marks open and close.'},
+  {q:'What does a green candle mean?',o:['It closed above its open','It closed below its open','Nothing moved','The market was closed'],a:0,e:'Green means the close was higher than the open.'},
+  {q:'A long upper wick suggests what?',o:['Price rose, then was pushed back down','Price never moved','The spread widened','The order was cancelled'],a:0,e:'Buyers pushed price up but sellers took it back before the close.'}]},
+{id:'trend',title:'Trends, support and resistance',time:'4 min',sum:'Spot direction and the price zones where markets often react.',sym:'NAS100',prod:'cfd',
+ body:['A trend is a series of higher highs and higher lows (an uptrend) or lower highs and lower lows (a downtrend). Trading with the trend is usually easier than fighting it.','Support is a price area where falling prices have repeatedly stopped and bounced. Resistance is where rising prices have repeatedly stalled. These are zones, not exact lines.','When price breaks through a level it can reverse roles, so old resistance can become support. Stops often sit just beyond a level, because a break there means your idea was wrong.'],
+ quiz:[{q:'Which describes an uptrend?',o:['Higher highs and higher lows','Lower highs and lower lows','A flat line','Random jumps'],a:0,e:'An uptrend keeps making higher peaks and higher dips.'},
+  {q:'Resistance is a price area where what has happened?',o:['Falling prices have repeatedly stopped','Rising prices have repeatedly stalled','The spread is widest','Orders are cancelled'],a:1,e:'Resistance caps rallies. Support holds up falls.'},
+  {q:'Where might a long trade place its stop loss?',o:['Just below support','Above resistance','Exactly at the entry price','Nowhere'],a:0,e:'A break below support suggests the trade idea has failed.'}]},
+{id:'psychology',title:'Trading psychology',time:'4 min',sum:'Fear of missing out, revenge trading and the rules that protect you.',sym:'US500',prod:'cfd',
+ body:['Emotions cause more losses than bad analysis. Common traps are fear of missing out (chasing a move after it has run), revenge trading (trading bigger to win back a loss) and overtrading (taking trades out of boredom).','Rules protect you from yourself: a daily loss limit, a maximum number of trades, and risk per trade fixed in advance. Decide these when you are calm, not in the middle of a losing streak.','After a loss, step away and review it. A loss within your plan is a normal business cost, not a failure.'],
+ quiz:[{q:'What is revenge trading?',o:['Trading bigger to win back a loss','Trading only on news','Closing winners early','Copying experts'],a:0,e:'It turns one loss into a larger one by abandoning your sizing rules.'},
+  {q:'When is the best time to set a daily loss limit?',o:['Calmly, before you start trading','In the middle of a losing streak','After doubling your position','Never'],a:0,e:'Limits set in advance are not bent by emotion.'},
+  {q:'A loss that stayed within your risk plan is what?',o:['Proof your strategy is broken','A normal cost of trading','A reason to double your size','A bug'],a:1,e:'Even good strategies lose often. Risk control keeps losses small.'}]},
+{id:'plan',title:'Your trading plan and journal',time:'4 min',sum:'Six questions to answer before every trade, and how to review.',sym:'SPY',prod:'invest',
+ body:['A plan answers six questions before you trade: which market and timeframe, what setup lets you enter, where your stop is, where your target is, how big the position is, and what makes you stay out.','A journal records each trade: why you entered, what happened, and whether you followed the plan. Reviewing it weekly shows patterns, such as losing more often in one market or at one time of day.','Judge yourself by whether you followed the plan, not by one result. A good trade can lose and a bad trade can win. The coach notes in GeneX work as a simple journal.'],
+ quiz:[{q:'Which belongs in a trading plan?',o:['A stop and target set before entry','A hunch about luck','A social media tip','The size of your last win'],a:0,e:'Exits are decided before you enter.'},
+  {q:'What is a trading journal for?',o:['Spotting patterns in your behaviour and results','Impressing others','Guaranteeing profit','Replacing stop losses'],a:0,e:'Review is how you find and fix repeated mistakes.'},
+  {q:'What is a good trade?',o:['One that always makes money','One that follows your plan and risk rules','The largest one','The shortest one'],a:1,e:'Process is in your control. Single results are not.'}]},
+{id:'diversify',title:'Diversification and ETFs',time:'4 min',sum:'Why spreading money out lowers the damage from any one mistake.',sym:'VT',prod:'invest',
+ body:['Diversification means spreading money across different holdings so that one bad outcome does not sink you. Ten shares in one sector can all fall together, so spread across sectors and regions too.','An ETF is a fund that trades like a share and holds many assets. A world or S&P 500 ETF gives you a slice of hundreds of companies in one purchase, usually at a low cost.','Diversification reduces the risk from single companies. It does not remove market risk, because broad markets can fall together, as they did in early 2020.'],
+ quiz:[{q:'Why diversify?',o:['To guarantee profit','So one holding going wrong hurts less','To avoid all spreads','To get leverage'],a:1,e:'It limits the damage from any single failure.'},
+  {q:'What is an ETF?',o:['A fund that trades like a share and holds many assets','A type of leverage','A forex pair','A stop order'],a:0,e:'One purchase gives you exposure to many holdings.'},
+  {q:'Does an ETF remove market risk?',o:['Yes','No, broad markets can still fall','Only on Fridays','Only with leverage'],a:1,e:'If the whole market drops, a broad ETF drops with it.'}]},
+{id:'shorting',title:'Going short',time:'4 min',sum:'Profiting from falling prices, and why shorts need extra care.',sym:'XTIUSD',prod:'cfd',
+ body:['Going short means selling first and buying back later. You profit if the price falls and lose if it rises. In GeneX you go short by choosing Sell on a Forex or CFD ticket.','Buying shares has a floor, because a price can only fall to zero. A short has no ceiling, because a price can keep rising, so losses can exceed what you first expected. That is why a stop loss matters even more on shorts.','A short is closed by buying back at the ask. Selling EURUSD means you are selling euros and buying dollars.'],
+ quiz:[{q:'You short a market and the price falls. What happens?',o:['You make a loss','You make a profit','Nothing changes','You get a margin call'],a:1,e:'You sold high and can buy back lower.'},
+  {q:'Why can a short lose more than a long share purchase?',o:['Prices can rise without a fixed limit','The spread is bigger','Leverage is unavailable','Stops do not work'],a:0,e:'A share can only fall to zero, but there is no upper limit on a rising price.'},
+  {q:'At which price is a short position closed?',o:['The bid','The ask','The previous close','The mid price'],a:1,e:'Buying back means paying the ask.'}]},
+{id:'costs',title:'The real cost of trading',time:'3 min',sum:'Spread, slippage and the financing costs this simulator leaves out.',sym:'GBPUSD',prod:'forex',
+ body:['The spread is the cost you can see on every ticket. Spreads are wider on less liquid markets and at quiet times, so the same trade can cost more.','Slippage is the difference between the price you expected and the price you got. It grows in fast markets and with stop orders.','Real CFD and forex brokers also charge overnight financing when you hold leveraged positions past the daily cut-off. GeneX does not model financing, so real holding costs would be higher than you see here.'],
+ quiz:[{q:'What is slippage?',o:['The gap between expected and actual fill price','A fee for opening an account','A type of chart','A margin level'],a:0,e:'Fast markets and stops make it more likely.'},
+  {q:'What usually makes slippage worse?',o:['Fast-moving markets','Quiet markets','Tiny orders only','Using limit orders'],a:0,e:'When price jumps, there may be no trade available at your level.'},
+  {q:'Which cost does GeneX not model?',o:['The spread','Overnight financing','Margin','Stop losses'],a:1,e:'Real brokers charge financing on leveraged positions held overnight.'}]},
+{id:'drivers',title:'What moves markets',time:'4 min',sum:'Interest rates, earnings, data and surprises.',sym:'UK100',prod:'cfd',
+ body:['Prices move on supply and demand, and news changes both. Central bank interest rate decisions move currencies, because higher rates tend to attract investment into that currency.','Company results move shares. Inflation, jobs and growth data move indices because they shape expectations for the whole economy. Oil and gold respond to supply, demand and global uncertainty, and gold is often seen as a safe haven.','Markets move on surprises compared with expectations. Good news that was already expected may not lift prices. Prices in GeneX are simulated and ignore news, so use real news only to learn these ideas.'],
+ quiz:[{q:'Higher interest rates tend to do what to a currency?',o:['Attract investment into it','Make it worthless','Close the market','Cancel spreads'],a:0,e:'Investors seek higher returns, which raises demand.'},
+  {q:'What usually moves a single share price?',o:['The company results and outlook','Moon phases','Lot size','The spread'],a:0,e:'Earnings and outlook change what the company is worth.'},
+  {q:'Markets react most strongly to what?',o:['Surprises compared with expectations','Old news','Nothing','Weekends'],a:0,e:'Expected news is already in the price.'}]},
+{id:'indicators',title:'Moving averages and RSI',time:'4 min',sum:'Two common indicators and why they lag. Try the SMA 20 button.',sym:'GER40',prod:'cfd',
+ body:['A moving average smooths price by averaging recent closes. Price above a 20-period average hints at upward momentum, and below it hints at downward. Turn on the SMA 20 button above the chart to see it.','RSI measures how strong recent gains were compared with losses, on a scale of 0 to 100. Above 70 is often called overbought and below 30 oversold. These are warnings of stretch, not signals on their own, because strong trends can stay stretched for a long time.','Indicators are built from past prices, so they lag. Use them to support a plan, not replace one, and test ideas with paper trades first.'],
+ quiz:[{q:'What does a moving average do?',o:['Smooths price by averaging recent closes','Predicts the next candle','Sets your stop loss','Shows the spread'],a:0,e:'It filters out noise to show the direction.'},
+  {q:'RSI above 70 is often called what?',o:['Overbought','Oversold','Neutral','Broken'],a:0,e:'It suggests a rally may be stretched, not that it must reverse.'},
+  {q:'Indicators are built from what?',o:['Past prices, so they lag','Future prices','News headlines','The spread only'],a:0,e:'They describe what already happened.'}]}
+];
+var TRACKS=[['Foundations',['basics','spread','orders','candles','trend']],['Risk and mindset',['risk','leverage','psychology','plan','diversify']],['Markets and instruments',['forex','cfd','shorting','costs','drivers','indicators']]];
+var LBYID={};LESSONS.forEach(function(l){LBYID[l.id]=l});
+LESSONS=[];TRACKS.forEach(function(t){t[1].forEach(function(id){LBYID[id].track=t[0];LESSONS.push(LBYID[id])})});
+
+/* ============ ui plumbing ============ */
+function toast(msg,kind){
+  var box=$('#toasts'),el=document.createElement('div');el.className='toast '+(kind||'');el.textContent=msg;box.appendChild(el);
+  while(box.children.length>3)box.removeChild(box.firstChild);
+  setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},4600);
+}
+function showModal(html){var m=$('#modal');m.innerHTML='<div class="mbg" data-act="mclose-bg"><div class="card modal" role="dialog" aria-modal="true">'+html+'</div></div>';var f=m.querySelector('input,button.primary');if(f)f.focus()}
+function closeModal(){$('#modal').innerHTML=''}
+function afterChange(){save();renderLists();if(view.name==='trade')lastSum='',lastCoach='';updateLive()}
+function go(name,o){
+  if(o)for(var k in o)view[k]=o[k];
+  view.name=name;render();$('#main').scrollTop=0;
+}
+function openTrade(sym,prod){
+  var i=BY[sym];if(!i)return;
+  view.sym=sym;view.prod=i.prods.indexOf(prod)>=0?prod:i.prods[0];view.hover=null;
+  initTicket();lastSum='';lastCoach='';go('trade');
+}
+function render(){
+  var m=$('#main'),h='';
+  if(view.name==='home')h=viewHome();else if(view.name==='markets')h=viewMarkets();else if(view.name==='trade')h=viewTrade();else if(view.name==='learn')h=viewLearn();else h=viewCoach();
+  m.innerHTML=h;
+  if(view.name==='trade'){$('#ticket').innerHTML=ticketHTML();lastSum='';lastCoach='';var cv=$('#mainChart');
+    cv.addEventListener('pointermove',function(e){var r=cv.getBoundingClientRect();view.hover={x:e.clientX-r.left,y:e.clientY-r.top};drawMain()});
+    cv.addEventListener('pointerleave',function(){view.hover=null;drawMain()})}
+  if(view.name==='markets'){$('#mList').innerHTML=marketList()}
+  if(view.name==='coach'){
+    if(!chat.length)chat.push({role:'c',ai:false,text:'Hi, I am your GeneX coach. I can review your account, check a trade before you place it, or explain any concept. What would you like to look at?'});
+    renderChat();renderFeed();renderKeyBox();setAiBadge();getSample();
+    $('#chatChips').innerHTML=chipsFor().map(function(c){return '<button class="chip" type="button" data-act="chatchip" data-q="'+esc(c)+'">'+esc(c)+'</button>'}).join('');
+  }
+  setNav();renderLists();updateTicketDyn();updateLive();drawActive();
+}
+
+var ACT={
+  nav:function(el){view.lesson=null;go(el.dataset.v)},
+  theme:function(){
+    var r=document.documentElement,cur=r.getAttribute('data-theme')||(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'),nx=cur==='dark'?'light':'dark';
+    r.setAttribute('data-theme',nx);S.theme=nx;save();drawActive();
+  },
+  pause:function(){paused=!paused;setPauseIcon();toast(paused?'Prices paused. Orders and stops will not trigger while paused.':'Prices running','')},
+  reset:function(){setupCur=S.cur||'USD';showModal(setupHTML())},
+  rspreset:function(el){var f=$('#rsAmt');if(f)f.value=el.dataset.v},
+  doreset:function(){
+    var c=CUR[setupCur],amt=num($('#rsAmt').value),er=$('#rsErr'),lo=100*c.sc,hi=1000000*c.sc;
+    if(!(amt>=lo&&amt<=hi)){er.textContent='Enter an amount between '+c.s+nf(lo,0)+' and '+c.s+nf(hi,0);return}
+    var keep=S.lessons,th=S.theme,sp=S.speed,w=S.watch,fx=fxRate(setupCur);
+    S=freshState(amt/fx);S.cur=setupCur;S.fx=fx;S.lessons=keep;S.theme=th;S.speed=sp;S.watch=w;S.welcomed=true;
+    INST.forEach(function(i){S.mids[i.sym]=i.mid});
+    closeModal();save();render();toast('Account ready with '+usd(S.start,0),'ok');
+  },
+  mclose:function(){closeModal()},
+  'mclose-bg':function(el,e){if(e.target===el)closeModal()},
+  welcome:function(){S.welcomed=true;save();render()},
+  open:function(el){openTrade(el.dataset.sym,el.dataset.prod)},
+  star:function(el,e){e.stopPropagation();var s=el.dataset.sym,n=S.watch.indexOf(s);if(n>=0)S.watch.splice(n,1);else S.watch.push(s);save();$('#mList').innerHTML=marketList();updateLive();drawSparks()},
+  mtab:function(el){view.mTab=el.dataset.v;view.mSub='All';render()},
+  msub:function(el){view.mSub=el.dataset.v;render()},
+  hl:function(el){view.hl=el.dataset.v;renderLists()},
+  tf:function(el){view.tf=+el.dataset.v;render()},
+  ctype:function(el){view.type=el.dataset.v;render()},
+  sma:function(){view.sma=!view.sma;render()},
+  prod:function(el){view.prod=el.dataset.v;initTicket();render()},
+  side:function(el){
+    if(el.dataset.v==='sell'&&view.prod==='invest'){toast('Invest is long-only. To sell a holding, close it from Home.','');return}
+    T.side=el.dataset.v;$('#ticket').innerHTML=ticketHTML();lastSum='';lastCoach='';updateTicketDyn();updateLive();
+  },
+  otype:function(el){T.type=el.dataset.v;$('#ticket').innerHTML=ticketHTML();lastSum='';lastCoach='';updateTicketDyn();updateLive()},
+  mode:function(el){
+    var i=BY[view.sym],m=T.mode,v=num(T.size);T.mode=el.dataset.v;
+    if(v>0&&m!==T.mode){T.size=T.mode==='sh'?trimNum(v/(S.fx||1)/i.ask,4):String(Math.round(v*i.ask*(S.fx||1)*100)/100)}
+    $('#ticket').innerHTML=ticketHTML();lastSum='';lastCoach='';updateTicketDyn();updateLive();
+  },
+  chip:function(el){T.size=el.dataset.v;var s=$('#tSize');if(s)s.value=T.size;updateTicketDyn()},
+  step:function(el){
+    var s=$('#tSize'),st=+s.dataset.step||0.01,v=num(T.size);if(!(v>=0))v=0;
+    v=Math.max(0,Math.round((v+st*(+el.dataset.d))*100)/100);T.size=String(v);s.value=T.size;updateTicketDyn();
+  },
+  slchip:function(el){
+    var i=BY[view.sym],o=buildOrder(),d=hourRange(i)*(+el.dataset.v);
+    var v=o.side==='buy'?o.ref-d:o.ref+d;T.sl=v.toFixed(i.dec);var s=$('#tSL');if(s)s.value=T.sl;updateTicketDyn();
+  },
+  tpchip:function(el){
+    var i=BY[view.sym],o=buildOrder();
+    if(o.sl==null){toast('Set a stop loss first. Targets are measured in multiples of your risk.','');return}
+    var d=Math.abs(o.ref-o.sl)*(+el.dataset.v),v=o.side==='buy'?o.ref+d:o.ref-d;
+    T.tp=v.toFixed(i.dec);var s=$('#tTP');if(s)s.value=T.tp;updateTicketDyn();
+  },
+  risksize:function(){
+    var i=BY[view.sym],o=buildOrder(),A=acct();
+    if(o.sl==null){toast('Set a stop loss first. Size is worked out from the distance to your stop.','');return}
+    var cv=convUSD(i,o.ref),per=Math.abs(o.ref-o.sl)*cv;
+    if(!(per>0)){toast('Your stop is at the entry price.','');return}
+    var units=(A.equity*0.01)/per;
+    if(view.prod==='invest'){var amt=Math.floor(units*o.ref*(S.fx||1)*100)/100;if(amt<(S.fx||1)){toast('That stop is too wide for a 1% risk on this account.','');return}T.mode='amt';T.size=String(amt);$('#ticket').innerHTML=ticketHTML()}
+    else{var sz=view.prod==='forex'?Math.floor(units/100000*100)/100:Math.floor(units*100)/100;if(sz<(view.prod==='forex'?0.01:i.minUnit)){toast('Even the smallest size risks more than 1% with that stop. Widen the stop or trade a cheaper market.','warn');return}T.size=String(sz);var s=$('#tSize');if(s)s.value=T.size}
+    lastSum='';lastCoach='';updateTicketDyn();toast('Sized so a stop-out costs about 1% of equity.','ok');
+  },
+  place:function(){
+    var m=metrics();if(m.err){toast(m.err,'warn');return}
+    var o=m.o;
+    if(T.type==='limit'){
+      S.orders.push({id:S.nid++,sym:o.sym,prod:o.prod,side:o.side,size:o.size,units:o.units,lev:o.lev,limit:o.limit,sl:o.sl,tp:o.tp,t:Date.now()});
+      toast('Limit order placed on '+o.sym+' at '+fp(BY[o.sym],o.limit),'ok');afterChange();return;
+    }
+    var r=openPosition(o);if(r.error)toast(r.error,'warn');
+  },
+  aiask:function(){
+    var m=metrics(),o=m.o,i=m.inst;
+    var q='I am about to '+(o.side==='buy'?'buy ':'sell ')+(view.prod==='forex'?o.size+' lots of ':(view.prod==='invest'?trimNum(o.units,4)+' shares of ':o.size+' units of '))+i.sym+' ('+prodName(view.prod)+(view.prod==='invest'?'':', leverage 1:'+o.lev)+') at about '+fp(i,m.entry)+', stop loss '+(o.sl!=null?fp(i,o.sl):'none')+', take profit '+(o.tp!=null?fp(i,o.tp):'none')+'. Is this a sensible trade for my account, and what would you change?';
+    go('coach');coachAsk(q);
+  },
+  close:function(el){closePosition(+el.dataset.id,1,'manual')},
+  half:function(el){closePosition(+el.dataset.id,0.5,'manual')},
+  cancel:function(el){S.orders=S.orders.filter(function(o){return o.id!==+el.dataset.id});toast('Order cancelled','');afterChange()},
+  edit:function(el){
+    var p=S.positions.find(function(x){return x.id===+el.dataset.id});if(!p)return;var i=BY[p.sym];
+    showModal('<h3>Edit '+p.sym+' stop and target</h3><p class="muted">Now '+fp(i,closePx(p))+'. Leave a field empty to remove it.</p><div class="two"><div class="fl"><label for="eSL">Stop loss</label><input class="inp" id="eSL" inputmode="decimal" value="'+(p.sl!=null?fp(i,p.sl):'')+'"></div><div class="fl"><label for="eTP">Take profit</label><input class="inp" id="eTP" inputmode="decimal" value="'+(p.tp!=null?fp(i,p.tp):'')+'"></div></div><div class="err" id="eErr"></div><div class="btnrow"><button class="btn primary" data-act="saveedit" data-id="'+p.id+'">Save</button><button class="btn" data-act="mclose">Cancel</button></div>');
+  },
+  saveedit:function(el){
+    var p=S.positions.find(function(x){return x.id===+el.dataset.id});if(!p){closeModal();return}
+    var i=BY[p.sym],px=closePx(p),sl=num($('#eSL').value),tp=num($('#eTP').value),er=$('#eErr');
+    sl=sl>0?sl:null;tp=tp>0?tp:null;
+    if(sl!=null&&(p.side==='buy'?sl>=px:sl<=px)){er.textContent='Stop loss must be '+(p.side==='buy'?'below ':'above ')+fp(i,px);return}
+    if(tp!=null&&(p.side==='buy'?tp<=px:tp>=px)){er.textContent='Take profit must be '+(p.side==='buy'?'above ':'below ')+fp(i,px);return}
+    p.sl=sl;p.tp=tp;p.riskUSD=sl!=null?Math.abs(p.entry-sl)*p.units*convUSD(i,p.entry):null;
+    closeModal();toast('Stop and target updated','ok');afterChange();
+  },
+  lesson:function(el){view.lesson=el.dataset.id;go('learn')},
+  lessons:function(){view.lesson=null;go('learn')},
+  quiz:function(){
+    var l=LESSONS.find(function(x){return x.id===view.lesson}),score=0,answered=0;
+    l.quiz.forEach(function(q,qi){
+      var box=$('#q'+qi),sel=box.querySelector('input:checked'),ex=box.querySelector('.ex');
+      $$('label',box).forEach(function(lb){lb.classList.remove('good','bad')});
+      if(sel){answered++;var v=+sel.value;if(v===q.a)score++;sel.parentNode.classList.add(v===q.a?'good':'bad');if(v!==q.a)$$('label',box)[q.a].classList.add('good')}
+      ex.hidden=false;ex.textContent=sel?q.e:'Pick an answer. '+q.e;
+    });
+    var out=$('#quizOut');
+    if(answered<l.quiz.length){out.textContent='Answer every question to record a score.';return}
+    var done=score>=2,prev=S.lessons[l.id];
+    S.lessons[l.id]={score:Math.max(score,prev?prev.score:0),done:done||(prev&&prev.done)};save();
+    out.textContent=score+' of '+l.quiz.length+' correct'+(done?'. Lesson passed.':'. Read the notes and try again.');
+  },
+  review:function(){var t=coachPortfolio();addFeed(t.map(function(x){return x.text}).join(' '),t.some(function(x){return x.lvl==='risk'})?'risk':(t.some(function(x){return x.lvl==='warn'})?'warn':'ok'))},
+  chatchip:function(el){coachAsk(el.dataset.q)},
+  keysave:function(){
+    var v=($('#keyIn').value||'').trim(),er=$('#keyErr');
+    if(v.indexOf('sk-ant-')!==0||v.length<20){er.textContent='That does not look like an Anthropic API key. It starts with sk-ant-.';return}
+    try{localStorage.setItem('genex.key',v)}catch(e){er.textContent='Your browser blocked saving the key.';return}
+    renderKeyBox();setAiBadge();toast('Claude connected. Ask the coach a question.','ok');
+  },
+  keyclear:function(){try{localStorage.removeItem('genex.key')}catch(e){}renderKeyBox();setAiBadge();toast('Claude disconnected','')}
+};
+document.addEventListener('click',function(e){
+  var el=e.target.closest('[data-act]');if(!el)return;
+  var f=ACT[el.dataset.act];if(f)f(el,e);
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&$('#modal').firstChild)closeModal();
+  if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('mrow')){e.preventDefault();ACT.open(e.target)}
+});
+document.addEventListener('input',function(e){
+  var t=e.target;
+  if(t.id==='mSearch'){view.mQ=t.value;$('#mList').innerHTML=marketList();updateLive();drawSparks();return}
+  if(t.dataset&&t.dataset.f&&T){
+    var f=t.dataset.f;T[f]=f==='lev'?+t.value:t.value;updateTicketDyn();
+  }
+});
+document.addEventListener('change',function(e){
+  var t=e.target;
+  if(t.id==='symSel'){var i=BY[t.value];openTrade(t.value,view.prod&&i.prods.indexOf(view.prod)>=0?view.prod:i.prods[0])}
+  if(t.id==='speedSel'){S.speed=+t.value;save()}
+  if(t.id==='rsCur'){setupCur=t.value;showModal(setupHTML())}
+  if(t.dataset&&t.dataset.f==='lev'){T.lev=+t.value;updateTicketDyn()}
+});
+document.addEventListener('submit',function(e){
+  if(e.target.id==='chatForm'){e.preventDefault();var inp=$('#chatIn');var q=inp.value;inp.value='';coachAsk(q)}
+});
+window.addEventListener('resize',function(){drawActive()});
+if(window.matchMedia){try{window.matchMedia('(prefers-color-scheme: light)').addEventListener('change',function(){drawActive()})}catch(e){}}
+
+/* ============ main loop ============ */
+function tick(){
+  if(paused)return;
+  simMs+=TICK_MS*S.speed;
+  var dt=TICK_MS*S.speed/60000;
+  INST.forEach(function(i){stepInst(i,dt)});
+  checkOrders();checkTriggers();checkStopOut();sampleEquity();
+  ticks++;if(ticks%10===0){save();var hc=$('#homeCoach');if(hc)hc.innerHTML=coachHTML(coachPortfolio())}
+  updateLive();drawActive();updateTicketDyn();
+}
+if(S.theme)document.documentElement.setAttribute('data-theme',S.theme);
+buildChrome();
+if(!S.equity.length)S.equity.push({t:minOf(simMs),v:acct().equity});
+render();
+setInterval(tick,TICK_MS);
+document.addEventListener('visibilitychange',function(){if(!document.hidden)drawActive()});
+if(DEBUG)window.__gx={S:function(){return S},INST:INST,BY:BY,tick:tick,openPosition:openPosition,closePosition:closePosition,acct:acct,checkOrder:checkOrder,go:go,openTrade:openTrade,ACT:ACT,T:function(){return T},metrics:metrics,coachPortfolio:coachPortfolio,usd:usd,fxRate:fxRate,coachAsk:coachAsk,chat:function(){return chat},view:view};
+})();
+</script>
+
+</body></html>
